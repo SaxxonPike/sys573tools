@@ -18,7 +18,7 @@ def get_key_information(sha1):
 
     for song in db:
         if song['sha1'].lower() == sha1:
-            return (bytearray(base64.b64decode(song['key'])), bytearray(base64.b64decode(song['scramble'])), bytearray(base64.b64decode(song['counter']))[0])
+            return (bytearray(base64.b64decode(song['key'])), bytearray(base64.b64decode(song['scramble'])), song['counter'])
 
     return (None, None, None)
 
