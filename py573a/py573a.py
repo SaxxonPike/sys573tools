@@ -6,6 +6,8 @@ import os
 import struct
 import sys
 
+import enc573
+
 DATABASE_FILENAME = "db.json"
 
 def get_database(filename=DATABASE_FILENAME):
@@ -39,91 +41,6 @@ def print_database_list():
             info = song['artist']
 
         print(song['game'], song['filename'], song['sha1'], info)
-
-
-def decrypt(data, key, scramble, counter):
-    output_data = bytearray(len(data))
-
-    data_len = len(data) // 2
-    key_len = len(key)
-    scramble_len = len(scramble)
-    output_idx = 0
-
-    for idx in range(0, data_len):
-        output_word = 0
-        cur_data = (data[(idx * 2) + 1] << 8) | data[(idx * 2)]
-
-        for cur_bit in range(0, 8):
-            even_bit_shift = (cur_bit * 2) & 0xff
-            odd_bit_shift = (cur_bit * 2 + 1) & 0xff
-
-            is_even_bit_set = int((cur_data & (1 << even_bit_shift)) != 0)
-            is_odd_bit_set = int((cur_data & (1 << odd_bit_shift)) != 0)
-            is_key_bit_set = int((key[idx % key_len] & (1 << cur_bit)) != 0)
-            is_scramble_bit_set = int((scramble[idx % scramble_len] & (1 << cur_bit)) != 0)
-            is_counter_bit_set = int((counter & (1 << cur_bit)) != 0)
-            is_counter_bit_inv_set =  int(counter & (1 << ((7 - cur_bit) & 0xff)) != 0)
-
-            if is_scramble_bit_set == 1:
-                is_even_bit_set, is_odd_bit_set = is_odd_bit_set, is_even_bit_set
-
-            if ((is_even_bit_set ^ is_counter_bit_inv_set ^ is_key_bit_set)) == 1:
-                output_word |= 1 << even_bit_shift
-
-            if (is_odd_bit_set ^ is_counter_bit_set) == 1:
-                output_word |= 1 << odd_bit_shift
-
-        output_data[output_idx] = (output_word >> 8) & 0xff
-        output_data[output_idx+1] = output_word & 0xff
-        output_idx += 2
-
-        counter = (counter + 1) & 0xff
-
-    return bytearray(output_data)
-
-
-def encrypt(data, key, scramble, counter):
-    output_data = bytearray(len(data))
-
-    data_len = len(data) // 2
-    key_len = len(key)
-    scramble_len = len(scramble)
-    output_idx = 0
-
-    for idx in range(0, data_len):
-        output_word = 0
-        cur_data = (data[(idx * 2)] << 8) | data[(idx * 2) + 1]
-
-        for cur_bit in range(0, 8):
-            even_bit_shift = (cur_bit * 2) & 0xff
-            odd_bit_shift = (cur_bit * 2 + 1) & 0xff
-
-            is_even_bit_set = int((cur_data & (1 << even_bit_shift)) != 0)
-            is_odd_bit_set = int((cur_data & (1 << odd_bit_shift)) != 0)
-            is_key_bit_set = int((key[idx % key_len] & (1 << cur_bit)) != 0)
-            is_scramble_bit_set = int((scramble[idx % scramble_len] & (1 << cur_bit)) != 0)
-            is_counter_bit_set = int((counter & (1 << cur_bit)) != 0)
-            is_counter_bit_inv_set =  int(counter & (1 << ((7 - cur_bit) & 0xff)) != 0)
-
-            set_even_bit = is_even_bit_set ^ is_counter_bit_inv_set ^ is_key_bit_set
-            set_odd_bit = is_odd_bit_set ^ is_counter_bit_set
-
-            if is_scramble_bit_set == 1:
-                set_even_bit, set_odd_bit = set_odd_bit, set_even_bit
-
-            if set_even_bit == 1:
-                output_word |= 1 << even_bit_shift
-
-            if set_odd_bit == 1:
-                output_word |= 1 << odd_bit_shift
-
-        output_data[output_idx] = output_word & 0xff
-        output_data[output_idx+1] = (output_word >> 8) & 0xff
-        output_idx += 2
-
-        counter = (counter + 1) & 0xff
-
-    return bytearray(output_data)
 
 
 if __name__ == "__main__":
@@ -177,10 +94,10 @@ if __name__ == "__main__":
         raise Exception("Couldn't find key information for file with SHA-1 hash of %s" % (sha1))
 
     if args.decrypt:
-        output_data = decrypt(data, key, scramble, counter)
+        output_data = enc573.decrypt(data, len(data) // 2, key, len(key), scramble, len(scramble), counter)
 
     elif args.encrypt:
-        output_data = encrypt(data, key, scramble, counter)
+        output_data = enc573.encrypt(data, len(data) // 2, key, len(key), scramble, len(scramble), counter)
 
     with open(args.output, "wb") as outfile:
         outfile.write(output_data)
