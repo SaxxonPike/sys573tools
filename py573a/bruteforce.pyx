@@ -52,6 +52,8 @@ cdef int is_match(unsigned char *a, int a_len, unsigned char *b, int b_len, int 
 
 
 cpdef bruteforce_key(unsigned char *data, int data_len, unsigned char *data_mp3, int data_mp3_len, unsigned char counter):
+    cdef unsigned int MAX_KEY_LEN = 0xf0
+
     cdef unsigned int i = 0
     cdef unsigned int j = 0
     cdef unsigned int cur_idx = 0
@@ -90,6 +92,7 @@ cpdef bruteforce_key(unsigned char *data, int data_len, unsigned char *data_mp3,
                     key_build_len += 1
                     scramble_build_len += 1
                     found_match = True
+
                     break
 
                 j += 1
@@ -100,12 +103,91 @@ cpdef bruteforce_key(unsigned char *data, int data_len, unsigned char *data_mp3,
             i += 1
 
         if len(key_build) == cur_key_len:
-            print("Couldn't find match")
-            exit(1)
+            return None, None, None
+
+        #if len(key_build) >= MAX_KEY_LEN:
+        #    break
 
         cur_idx += 2
 
     return key_build, scramble_build, likely_key_size
+
+
+cpdef bruteforce_key_counter(unsigned char *data, int data_len, unsigned char *data_mp3, int data_mp3_len):
+    cdef unsigned int MAX_KEY_LEN = 0xf0
+
+    cdef unsigned int i = 0
+    cdef unsigned int j = 0
+    cdef unsigned int counter = 0
+    cdef unsigned int cur_idx = 0
+    cdef int key_build_len = 0
+    cdef int scramble_build_len = 0
+    cdef int chunk_size = 0
+    cdef int max_key = 0x100
+    cdef int found_counter = 0
+
+    key_build = bytearray()
+    scramble_build = bytearray()
+
+    while cur_idx + 1 < data_mp3_len:
+        likely_key_size = find_key_size(key_build, key_build_len)
+
+        if likely_key_size != -1:
+            break
+
+        cur_key_len = len(key_build)
+
+        found_match = False
+        i = 0
+        while i <= 0xff:
+            j = 0
+
+            while j <= 0xff:
+                if not found_counter:
+                    counter = 0
+
+                while counter < max_key:
+                    key = key_build + bytearray([i])
+                    scramble = scramble_build + bytearray([j])
+
+                    chunk = data[:cur_idx+2]
+                    chunk_size = len(chunk) // 2
+                    output = enc573.decrypt(chunk, chunk_size, key, key_build_len + 1, scramble, scramble_build_len + 1, counter)
+
+                    # TODO: Rewrite this check to be more Cythonic
+                    if output[:cur_idx+2] == data_mp3[:cur_idx+2]:
+                        key_build = key
+                        scramble_build = scramble
+                        key_build_len += 1
+                        scramble_build_len += 1
+                        found_match = True
+
+                        break
+
+                    counter += 1
+
+                if found_match and not found_counter:
+                    max_key = counter + 1
+                    found_counter = 1
+                    print("Found counter: %02x" % (counter))
+                    break
+
+                if found_match:
+                    break
+
+                j += 1
+
+            if found_match:
+                break
+
+            i += 1
+
+        if len(key_build) == cur_key_len:
+            continue
+
+        cur_idx += 2
+
+    return key_build, scramble_build, likely_key_size, counter
 
 
 cpdef bruteforce_scramble_key(unsigned char *data, int data_len, unsigned char *data_mp3, int data_mp3_len, unsigned char counter, unsigned int cur_idx, key_build, scramble_build):
