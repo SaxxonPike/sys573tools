@@ -74,14 +74,14 @@
     bnez a2, @@SkipInitializePointer
     nop
 
-    li a2, 0x80153402
+    li a2, 0x80153438 ; start address (80153448) - entry size
 
 @@SkipInitializePointer:
-    addi a2, 0x46
+    addi a2, 0x10 ; Entry size
     sw a2, 0(a3)
     nop
 
-    addi a2, 0x06
+    addi a2, 0x06 ; Key section size (2 + 2 + 1 + 1 padding)
     sw a2, 8(a3)
     nop
 .endmacro
@@ -362,5 +362,9 @@ CopyFilenamePointerReturn:
     j HookKey3
     nop
     HookKey3Return:
+
+; Force filename search to start at 0 instead of whatever the last one was
+.org 0x8002120C
+
 
 .close

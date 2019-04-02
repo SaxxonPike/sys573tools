@@ -50,7 +50,7 @@ def generate_dec_list(input_folder, dec_list):
         for fileinfo in dec_list:
             outfile.write(struct.pack("<HHH", get_hex(fileinfo['key1']), get_hex(fileinfo['key2']), get_hex(fileinfo['key3'])))
             outfile.write(fileinfo['filename'].encode('ascii'))
-            outfile.write(b'\0' * (64 - len(fileinfo['filename'].encode('ascii'))))
+            outfile.write(b'\0' * (10 - len(fileinfo['filename'].encode('ascii'))))
 
         outfile.write(b'\0' * (16 - (outfile.tell() % 16)))
 
@@ -64,6 +64,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     dec_list = json.load(open(args.list))
+
+    dec_list_filtered = []
+    dec_list_found = {}
+
+    for entry in dec_list:
+        if entry['sha1'] not in dec_list_found:
+            dec_list_filtered.append(entry)
+            dec_list_found[entry['sha1']] = True
+
+        else:
+            print("Skipping duplicate file...", entry['sha1'])
 
     generate_da_list(args.data, dec_list)
     generate_dec_list(args.data, dec_list)
