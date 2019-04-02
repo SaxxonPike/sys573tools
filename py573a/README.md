@@ -84,15 +84,20 @@ If in the future more data is discovered that isn't covered by this tool, it is 
       6. Dump entire MP3 table from memory
     - Hardware memory method: Same as MAME method but you dump the memory from the hardware, as well as maybe some well placed hooks (reference hwdecodertool maybe)
 2. Generate decryption disc with samples and decryption list from data gathered in step
-3. Run disc on real hardware. This will automatically decrypt all of the data on the disc that was in the decryption list.
+3. Connect the logic analyzer
+  - Connect your logic analyzer to pins 31 and 32 on the MAS3507D chip
+  - Reference: http://www.mas-player.de/mp3/download/mas3507d.pdf, page 36, fig 4-4 "44-pin PQFP package" (NOT the PLCC package)
+4. Run disc on real hardware. This will automatically decrypt all of the data on the disc that was in the decryption list.
   - Run your logic analyzer from start to end @ 2 MHz, PulseView is recommended since it stores all samples in memory until you save them. sigrok-ci is also acceptable but you may run into issues with your logic analyzer quitting very fast if your system can't keep up with capturing at 2 MHz to a file on disk.
-4. Convert the capture to a binary output
+5. Convert the capture to a binary output
   - `sigrok-cli -P spi:wordsize=8:miso=D1:clk=D0:cpol=1:cpha=1 -i input.sr -A spi="MISO data" > input.txt`
   - Convert input.txt to a binary file (if you've done everything up to this point then this is trivial, just read the hex bytes from the text file info a binary file)
-5. Split the data into individual files based on the order that they were written to the decryption list on disc.
-6. Run bruteforce_process_list.py on the decryption list with the plaintext headers against the full encrypted DAT files and wait for the keys to be bruteforced
+6. Split the data into individual files based on the order that they were written to the decryption list on disc.
+7. Run bruteforce_process_list.py on the decryption list with the plaintext headers against the full encrypted DAT files and wait for the keys to be bruteforced
   - It may take a few minutes to bruteforce a key depending on your system
   - bruteforce_process_list.py will try to use as many cores as possible, with each core handling 1 bruteforce process
   - Don't forget to run `python setup.py build_ext --inplace` to compile the Cython code
-7. If successful, you should see keys flying across the terminal
+8. If successful, you should see keys flying across the terminal
   - A key is determined to be successful if it is possible to decrypt the encrypted DAT to match the plaintext MP3 file, so the more data you use for your input samples (for example, 0x8000 instead of 0x2000), the more accurate the end result should be.
+
+WARNING: The current db.json was created using the power of a 112 core server. It would probably take a long time to bruteforce everything with consumer grade hardware. Expect a few hours for a single game.
