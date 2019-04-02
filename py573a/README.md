@@ -2,6 +2,10 @@
 
 A Python recreation of 573a.jar with less Java, less GUI, less obfuscation, less encryption, and less Shiba Inus.
 
+py573a.py requires Cython. Build the required files using `python setup.py build_ext --inplace`.
+
+py573a_native.py contains the decryption algorithm in native Python, in case you want to use the tool in an environment where Cython is inconvenient. Note: This version will be slower, but it should be easier to use without installing Cython and a C compiler, etc.
+
 ## Usage
 
 ```

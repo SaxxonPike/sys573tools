@@ -16,29 +16,12 @@ def get_key_information(sha1):
     db = get_database()
     sha1 = sha1.lower()
 
-    # key = "FClQzbcWBFOZBW5hG6P36/uCJQKjYzT+YqWq0Gg8EG0UYK0MXAvBXf/wijJmzduiTNR1o/Q+oi0iWOC0JW4XKx++WA/FWbu0znYiYMG4FEXkhdIYhA0CeMCUTLjB65c2bTrwbLi3zXUhK3MKEAGgKH+1KRcYYtqO"
-    # scramble = "VQ5vGtSDj6ql9gQ4LQZ8fXMSwSZxY0ZJGrGNmLPJPpj5HrDnBiMsfx4iNxxmJcan4wZRLgsEV2NfSmEb/jRVD7PkbUhHFIi0oYrwIaLDahxLdlNcD9bq/9Su3BR1QmE2rYiH1CQYDSZcMKHAAYrdcldYC7KOm7DK"
-    # counter = 0x82
-
-    # key = "oFrxsixVGM5ijfJgCB03/gRkJwNrJvBc9IsZccPDCvDMj36Y1QOvP0DSujFmr1WLyJEDTpg0YR6M5KRJgHq19ujdkEbqlep4EAw0/QdGBSMvYrQYME/dtUvbEujdnn269yGNH2DymnWia5EDQIkSX4klYh2P54Zp"
-    # scramble = "cjCJ12s2HQtGISkUTxKMufsWSDWDqL7zDgY7YCjR5KbotsUvBBJfd39CGfs6D00eQEBIY3U4vLSJ0mRkUROr9W9yWU8C4enUj5qUoeMHWRahipzRCgI/ZGwRJGZgPt0+FQNOVFxhOtk+C0laBIDA6/2wpKyRynVH"
-    # counter = 0xe6
-
-    # key = "7LcPWzaAzJ0/LnHO1Bnv1o16nPFHC3OHliwZf7JE"
-    # scramble = "FEZtFwQiT1ZMMaeq1eej57XGKToccQOr1k02iLr+"
-    # counter = 0xef
-
-    key = "I971Ch1y5OE8EI82if+XTrNnmHAfdoxRgh1b5JIF"
-    scramble = "FntfBoH6OfaBrtNHfAPvXzLpsMizj7/IGGUONUpZ"
-    counter = 0x45
-
-    return (bytearray(base64.b64decode(key)), bytearray(base64.b64decode(scramble)), counter)#song['counter'])
-
     for song in db:
         if song['sha1'].lower() == sha1:
-            return (bytearray(base64.b64decode("oVvzsCxVGM5iifZkDB0/9gx0NwNrJvBc1Ks5UcOD")), bytearray(base64.b64decode("EiCJkQAgHAgAISkACxAIgGEQSCGDMAxCDAArYACR")), 0xe6)#song['counter'])
+            return (bytearray(base64.b64decode(song['key'])), bytearray(base64.b64decode(song['scramble'])), song['counter'])
 
     return (None, None, None)
+
 
 
 def print_database_list():
