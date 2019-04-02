@@ -85,7 +85,7 @@ If in the future more data is discovered that isn't covered by this tool, it is 
     - Hardware memory method: Same as MAME method but you dump the memory from the hardware, as well as maybe some well placed hooks (reference hwdecodertool maybe)
 2. Generate decryption disc with samples and decryption list from data gathered in step
 3. Connect the logic analyzer
-  - Connect your logic analyzer to pins 31 and 32 on the MAS3507D chip
+  - Connect your logic analyzer to pins 30 and 32 on the MAS3507D chip
   - Reference: http://www.mas-player.de/mp3/download/mas3507d.pdf, page 36, fig 4-4 "44-pin PQFP package" (NOT the PLCC package)
 4. Run disc on real hardware. This will automatically decrypt all of the data on the disc that was in the decryption list.
   - Run your logic analyzer from start to end @ 2 MHz, PulseView is recommended since it stores all samples in memory until you save them. sigrok-ci is also acceptable but you may run into issues with your logic analyzer quitting very fast if your system can't keep up with capturing at 2 MHz to a file on disk.
