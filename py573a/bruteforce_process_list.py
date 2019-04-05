@@ -1,45 +1,15 @@
 import argparse
+import base64
 import glob
 import hashlib
 import json
 import os
 
 import bruteforce_keys
+import database
 
 from collections import OrderedDict
 from multiprocessing import Pool
-
-def read_database(filename="db.json"):
-    db = json.load(open(filename))
-
-    output = {}
-
-    for entry in db:
-        output[entry['sha1']] = entry
-
-    return output
-
-
-def read_database_keys(filename="process_list.json", input_db=None):
-    db = json.load(open(filename))
-
-    output = {}
-
-    for entry in db:
-        k = "%04x_%04x" % (int(str(entry['key1']), 0), int(str(entry['key2']), 0))
-
-        if k not in output:
-            output[k] = []
-
-        if input_db:
-            for k2 in input_db:
-                if entry['filename'].lower() == input_db[k2]['filename'].lower().replace(".dat", ""):
-                    entry['sha1'] = k2
-
-        output[k].append(entry)
-
-    return output
-
 
 def get_sha1(filename):
     with open(filename, "rb") as infile:
@@ -85,8 +55,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    db = read_database(args.input_db)
-    db_by_key = read_database_keys(args.input_list, input_db=db)
+    db = database.read_database(args.input_db)
     process_list = json.load(open(args.input_list))
 
     if not os.path.exists(args.output):
@@ -102,13 +71,6 @@ if __name__ == "__main__":
             fileinfo['sha1'] = get_sha1(input_dat)
 
         sha1 = fileinfo['sha1']
-
-        # Find songs with the same key
-        # k = "%04x_%04x" % (int(fileinfo['key1'], 0), int(fileinfo['key2'], 0))
-
-        # for entry in db_by_key[k]:
-        #     input_dat2 = os.path.join(args.input_dat, entry['filename'].upper() + ".DAT")
-        #     print("%s %s %d" % (entry['filename'], get_sha1(input_dat2), int(entry['key3'], 0)))
 
         if sha1 in db:
             print("Already have key for %s, skipping..." % fileinfo['filename'])
@@ -127,18 +89,29 @@ if __name__ == "__main__":
     for keyfile in json_files:
         keyinfo = json.load(open(keyfile))
 
-        entry = OrderedDict([
-            ("game", ""),
-            ("artist", ""),
-            ("title", ""),
-            ("filename", keyinfo['filename'].upper() + ".DAT"),
-            ("sha1", keyinfo['sha1']),
-            ("status", "UNVERIFIED"),
-            ("key", keyinfo['key']),
-            ("scramble", keyinfo['scramble']),
-            ("counter", int(str(keyinfo['key3']), 0)),
-        ])
+        key = "%04x_%04x_%02x" % (keyinfo['key1'], keyinfo['key2'], keyinfo['key3'])
 
-        db_json.append(entry)
+        if key not in db_json['keys']:
+            db_json['keys'][key] = OrderedDict([
+                ("key", keyinfo['key']),
+                ("scramble", keyinfo['scramble']),
+                ("counter", int(str(keyinfo['key3']), 0)),
+            ])
+
+        else:
+            rkey = db_json['keys'][key]['key']
+            rscramble = bytearray(base64.b64decode(db_json['keys'][key]['scramble']))
+            rscramble2 = bytearray(base64.b64decode(keyinfo['scramble']))
+
+            for i in range(len(rscramble)):
+                rscramble[i] |= rscramble2[i]
+
+            db_json['keys'][key] = OrderedDict([
+                ("key", rkey),
+                ("scramble", base64.b64encode(rscramble).decode('ascii')),
+                ("counter", int(str(keyinfo['key3']), 0)),
+            ])
+
+        db_json['key_mapping'][keyinfo['sha1'].upper()] = key
 
     json.dump(db_json, open(args.output_db, "w"), indent=4)

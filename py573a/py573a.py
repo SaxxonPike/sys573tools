@@ -6,41 +6,32 @@ import os
 import struct
 import sys
 
+import database
 import enc573
 
 DATABASE_FILENAME = "db.json"
 
+db_loaded = None
+
 def get_database(filename=DATABASE_FILENAME):
-    return json.load(open(filename, "r"), encoding="utf-8")
+    global db_loaded
+
+    if not db_loaded:
+        db_loaded = database.read_database(filename)
+
+    return db_loaded
 
 
 def get_key_information(sha1):
     db = get_database()
-    sha1 = sha1.lower()
+    sha1 = sha1.upper()
 
-    for song in db:
-        if song['sha1'].lower() == sha1:
-            return (bytearray(base64.b64decode(song['key'])), bytearray(base64.b64decode(song['scramble'])), song['counter'])
+    song = db.get(sha1, None)
+
+    if song:
+        return (bytearray(base64.b64decode(song['key'])), bytearray(base64.b64decode(song['scramble'])), song['counter'])
 
     return (None, None, None)
-
-
-def print_database_list():
-    db = get_database()
-
-    for song in db:
-        info = ""
-
-        if song['title'] and song['artist']:
-            info = "%s - %s" % (song['artist'], song['title'])
-
-        elif song['title']:
-            info = song['title']
-
-        elif song['artist']:
-            info = song['artist']
-
-        print(song['game'], song['filename'], song['sha1'], info)
 
 
 if __name__ == "__main__":
@@ -53,13 +44,8 @@ if __name__ == "__main__":
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--decrypt', help='Decrypt input file', action='store_true')
     group.add_argument('--encrypt', help='Encrypt input file', action='store_true')
-    group.add_argument('--list', help='List all songs in database', action='store_true')
 
     args = parser.parse_args()
-
-    if args.list:
-        print_database_list()
-        exit(1)
 
     if not args.input:
         parser.print_help(sys.stderr)

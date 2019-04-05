@@ -52,17 +52,12 @@ python py573a.py --list
 ### Database
 The database as of current writing (2019/04/02) contains everything I could find on the System 573 Digital I/O platform with some exceptions:
 - Dance Dance Revolution Solo Bass Mix
-  - Does something weird with how it uses the FPGA so more research is required. I will definitely get this done when I can.
+  - Uses a variantion of the encryption algorithm but can be decrypted with slight modifications to current tools. Will include keys in the near future.
+
 - Guitar Freaks/Drummania Multisession Unit-related audio
   - These are used by System 573 Digital I/O games (GFDM) but the hardware itself is different. As far as I can tell from my research, the multisession unit decrypts the data itself and sends the audio out over RCA. The connection to the System 573 Digital I/O hardware is for serial communication to communicate with the server running on the multisession unit in order to tell it what files to load and similar actions. The unit is entirely self-contained. I will take a look at this but it's possibly out of scope of this project, and hard to work on without having the actual hardware.
-- Dance Dance Revolution Solo 2000 (JAA/AAA)
-  - The following files are on the disc but are not referenced (which means no keys available) as far as I can tell:
-    - `DAT/S2H189R8.DAT`
-    - `DAT/E2ON849P.DAT`
-    - `DAT/M17189R8.DAT`
-  - These files may still be recoverable, but a stronger bruteforce method will be required.
 
-As away to verify the output data without listening to every individual MP3, I have run mp3val over all of the MP3s decrypted from every game on the platform. A total of 9 files have shown some sign of corruption in the MP3 frames. I will investigate these 9 files in further detail soon to determine if it's an error with decryption or an error with the source data that's on the disc (be it corruption in the dumps or the MP3 data was originally corrupt in the first place).
+(Update 2019/04/05) The known corrupt files have been fixed. The remaining Dance Dance Revolution Solo 2000 (JAA/AAA) files have been added to the database. The database format has undergone a drastic change in order to reduce duplicate data and include all of the original keys required by the FPGA for future use.
 
 Everything else, to my knowledge, should be decryptable. Please create an issue on this repository if you find something that isn't covered by the tool or is broken.
 
