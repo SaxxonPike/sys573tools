@@ -10,7 +10,7 @@ py573a_native.py contains the decryption algorithm in native Python, in case you
 
 ```
 usage: py573a.py [-h] [--input INPUT] [--output OUTPUT] [--sha1 SHA1]
-                 (--decrypt | --encrypt | --list)
+                 (--decrypt | --encrypt)
 
 optional arguments:
   -h, --help       show this help message and exit
@@ -20,7 +20,6 @@ optional arguments:
                    (optional)
   --decrypt        Decrypt input file
   --encrypt        Encrypt input file
-  --list           List all songs in database
 ```
 
 Without `--output (filename.mp3)` being specified, it will automatically output a file in the same location as input.dat/.mp3 with a .mp3/.dat extension.
@@ -41,26 +40,16 @@ python py573a.py --encrypt --input input.mp3 --output test.dat --sha1 0123456789
 ```
 
 
-### List
-List mode displays a list of all songs in the database. You could also open db.json directly to view the same information.
-
-```
-python py573a.py --list
-```
-
-
 ### Database
 The database as of current writing (2019/04/02) contains everything I could find on the System 573 Digital I/O platform with some exceptions:
-- Dance Dance Revolution Solo Bass Mix
-  - Uses a variantion of the encryption algorithm but can be decrypted with slight modifications to current tools. Will include keys in the near future.
-
 - Guitar Freaks/Drummania Multisession Unit-related audio
   - These are used by System 573 Digital I/O games (GFDM) but the hardware itself is different. As far as I can tell from my research, the multisession unit decrypts the data itself and sends the audio out over RCA. The connection to the System 573 Digital I/O hardware is for serial communication to communicate with the server running on the multisession unit in order to tell it what files to load and similar actions. The unit is entirely self-contained. I will take a look at this but it's possibly out of scope of this project, and hard to work on without having the actual hardware.
 
-(Update 2019/04/05) The known corrupt files have been fixed. The remaining Dance Dance Revolution Solo 2000 (JAA/AAA) files have been added to the database. The database format has undergone a drastic change in order to reduce duplicate data and include all of the original keys required by the FPGA for future use.
-
 Everything else, to my knowledge, should be decryptable. Please create an issue on this repository if you find something that isn't covered by the tool or is broken.
 
+(Update 2019/04/05) All Dance Dance Revolution Solo Bass Mix songs have been added to the database.
+
+(Update 2019/04/05) The known corrupt files have been fixed. The remaining Dance Dance Revolution Solo 2000 (JAA/AAA) files have been added to the database. The database format has undergone a drastic change in order to reduce duplicate data and include all of the original keys required by the FPGA for future use.
 
 
 ### How to decrypt songs not found in this database

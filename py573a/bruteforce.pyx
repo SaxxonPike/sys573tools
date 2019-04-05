@@ -2,7 +2,7 @@
 
 import enc573
 
-cpdef int find_key_size(unsigned char *key, int key_len):
+cpdef int find_key_size(unsigned char *key, int key_len, int counter_step=1):
     cdef unsigned int ks = 0
     cdef unsigned int idx = 0
     cdef unsigned int i = 0
@@ -15,7 +15,10 @@ cpdef int find_key_size(unsigned char *key, int key_len):
     cdef unsigned int key_sizes[8]
     cdef unsigned int confidence[8]
 
-    idx = 0x1e
+    idx_step = 0x10 if counter_step == 0 else 0x1e
+
+    idx = idx_step
+
     while idx < key_len:
         found = True if idx + 10 >= key_len else False
 
@@ -28,7 +31,7 @@ cpdef int find_key_size(unsigned char *key, int key_len):
         if found:
             return idx
 
-        idx += 0x1e
+        idx += idx_step
 
     return -1
 
@@ -51,7 +54,7 @@ cdef int is_match(unsigned char *a, int a_len, unsigned char *b, int b_len, int 
     return match
 
 
-cpdef bruteforce_key(unsigned char *data, int data_len, unsigned char *data_mp3, int data_mp3_len, unsigned char counter):
+cpdef bruteforce_key(unsigned char *data, int data_len, unsigned char *data_mp3, int data_mp3_len, unsigned char counter, int counter_step=1):
     cdef unsigned int MAX_KEY_LEN = 0xf0
 
     cdef unsigned int i = 0
@@ -65,7 +68,7 @@ cpdef bruteforce_key(unsigned char *data, int data_len, unsigned char *data_mp3,
     scramble_build = bytearray()
 
     while cur_idx + 1 < data_mp3_len:
-        likely_key_size = find_key_size(key_build, key_build_len)
+        likely_key_size = find_key_size(key_build, key_build_len, counter_step)
 
         if likely_key_size != -1:
             break
@@ -83,7 +86,7 @@ cpdef bruteforce_key(unsigned char *data, int data_len, unsigned char *data_mp3,
 
                 chunk = data[:cur_idx+2]
                 chunk_size = len(chunk) // 2
-                output = enc573.decrypt(chunk, chunk_size, key, key_build_len + 1, scramble, scramble_build_len + 1, counter)
+                output = enc573.decrypt(chunk, chunk_size, key, key_build_len + 1, scramble, scramble_build_len + 1, counter, counter_step)
 
                 # TODO: Rewrite this check to be more Cythonic
                 if output[:cur_idx+2] == data_mp3[:cur_idx+2]:
@@ -92,7 +95,6 @@ cpdef bruteforce_key(unsigned char *data, int data_len, unsigned char *data_mp3,
                     key_build_len += 1
                     scramble_build_len += 1
                     found_match = True
-
                     break
 
                 j += 1
@@ -161,7 +163,6 @@ cpdef bruteforce_key_counter(unsigned char *data, int data_len, unsigned char *d
                         key_build_len += 1
                         scramble_build_len += 1
                         found_match = True
-
                         break
 
                     counter += 1
@@ -190,7 +191,7 @@ cpdef bruteforce_key_counter(unsigned char *data, int data_len, unsigned char *d
     return key_build, scramble_build, likely_key_size, counter
 
 
-cpdef bruteforce_scramble_key(unsigned char *data, int data_len, unsigned char *data_mp3, int data_mp3_len, unsigned char counter, unsigned int cur_idx, key_build, scramble_build):
+cpdef bruteforce_scramble_key(unsigned char *data, int data_len, unsigned char *data_mp3, int data_mp3_len, unsigned char counter, unsigned int cur_idx, key_build, scramble_build, int counter_step=1):
     cdef unsigned int j = 0
     cdef int key_size = len(key_build)
     cdef int key_build_len = len(key_build)
@@ -213,7 +214,7 @@ cpdef bruteforce_scramble_key(unsigned char *data, int data_len, unsigned char *
 
             chunk = data[:cur_idx+2]
             chunk_size = len(chunk) // 2
-            output = enc573.decrypt(chunk, chunk_size, key_build, key_build_len, scramble, scramble_build_len, counter)
+            output = enc573.decrypt(chunk, chunk_size, key_build, key_build_len, scramble, scramble_build_len, counter, counter_step)
             output_len = len(output)
 
             if is_match(output, output_len, data_mp3, data_mp3_len, c, key_size) == 1:

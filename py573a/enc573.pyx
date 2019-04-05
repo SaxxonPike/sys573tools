@@ -1,6 +1,6 @@
 # cython: cdivision=True
 
-cpdef bytearray decrypt(unsigned char *data, int data_len, unsigned char *key, int key_len, unsigned char *scramble, int scramble_len, unsigned char counter):
+cpdef bytearray decrypt(unsigned char *data, int data_len, unsigned char *key, int key_len, unsigned char *scramble, int scramble_len, unsigned char counter, int counter_step=1):
     cdef unsigned int output_idx = 0
     cdef unsigned int idx = 0
     cdef unsigned int even_bit_shift = 0
@@ -47,14 +47,14 @@ cpdef bytearray decrypt(unsigned char *data, int data_len, unsigned char *key, i
         output_data[output_idx+1] = output_word & 0xff
         output_idx += 2
 
-        counter += 1
+        counter += counter_step
 
         idx += 1
 
     return output_data
 
 
-cpdef bytearray encrypt(unsigned char *data, int data_len, unsigned char *key, int key_len, unsigned char *scramble, int scramble_len, unsigned char counter):
+cpdef bytearray encrypt(unsigned char *data, int data_len, unsigned char *key, int key_len, unsigned char *scramble, int scramble_len, unsigned char counter, int counter_step=1):
     cdef unsigned int output_idx = 0
     cdef unsigned int idx = 0
     cdef unsigned int even_bit_shift = 0
@@ -106,7 +106,7 @@ cpdef bytearray encrypt(unsigned char *data, int data_len, unsigned char *key, i
         output_data[output_idx+1] = (output_word >> 8) & 0xff
         output_idx += 2
 
-        counter += 1
+        counter += counter_step
 
         idx += 1
 
