@@ -10,9 +10,7 @@ def decrypt(data, key):
         key += b"\x00"
 
     # Prepare key as 16-bit words
-    L = []
-    for i in range(0, len(key), 2):
-        L.append(int.from_bytes(key[i:i+2], byteorder="little"))
+    key = [int.from_bytes(key[i:i+2], byteorder="little") for i in range(0, len(key), 2)]
 
     # Generate extended key
     expanded_key = [ 0xb7e1, 0x5618, 0xf44f, 0x9286, 0x30bd, 0xcef4, 0x6d2b, 0x0b62,
@@ -24,7 +22,7 @@ def decrypt(data, key):
     t0 = t1 = s1 = 0
     for x in range(32):
         a2 = expanded_key[x]
-        a0 = L[x % len(L)]
+        a0 = key[x % len(key)]
 
         for k in range(3):
             v0 = a2 + t1 + t0
@@ -39,7 +37,7 @@ def decrypt(data, key):
             t0 = a0 & 0xffff
 
         expanded_key[x] = t1
-        L[x % len(L)] = t0
+        key[x % len(key)] = t0
 
         v1 = (t1 & 0xff) & 0xff
         s1 = (s1 + v1) & 0xff
