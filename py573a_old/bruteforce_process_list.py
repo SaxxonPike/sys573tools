@@ -34,7 +34,7 @@ def process_entry(entry):
         print("Couldn't find keys for", input_dat, "%02x" % counter)
         return
 
-    print(fileinfo['filename'], sha1, counter)
+    print(fileinfo['filename'], counter)
 
     fileinfo['key'] = key
     fileinfo['scramble'] = scramble
@@ -88,6 +88,15 @@ if __name__ == "__main__":
     db_json = json.load(open(args.input_db), object_pairs_hook=OrderedDict)
     for keyfile in json_files:
         keyinfo = json.load(open(keyfile))
+
+        if isinstance(keyinfo['key1'], str):
+            keyinfo['key1'] = int(keyinfo['key1'][2:], 16)
+
+        if isinstance(keyinfo['key2'], str):
+            keyinfo['key2'] = int(keyinfo['key2'][2:], 16)
+
+        if isinstance(keyinfo['key3'], str):
+            keyinfo['key3'] = int(keyinfo['key3'][2:], 16)
 
         key = "%04x_%04x_%02x" % (keyinfo['key1'], keyinfo['key2'], keyinfo['key3'])
 
