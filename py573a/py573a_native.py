@@ -150,6 +150,10 @@ def main():
     parser.add_argument('--output', help='Output file', default=None)
     parser.add_argument('--sha1', help='Force usage of a specific SHA-1 for encryption keys (optional)', default=None)
 
+    parser.add_argument('--key1', help='Key 1 (optional)', default=None, type=int)
+    parser.add_argument('--key2', help='Key 2 (optional)', default=None, type=int)
+    parser.add_argument('--key3', help='Key 3 (optional)', default=None, type=int)
+
     args = parser.parse_args()
 
     if not args.input:
@@ -169,20 +173,25 @@ def main():
     with open(args.input, "rb") as infile:
         data = infile.read()
 
-    sha1 = args.sha1
-    if sha1 is None:
-        m = hashlib.sha1()
-        m.update(data)
-        sha1 = m.hexdigest()
+    key1 = args.key1
+    key2 = args.key2
+    key3 = args.key3
 
-    if sha1 is None:
-        raise Exception("A SHA-1 must be set to continue")
+    if key1 is None or key2 is None or key3 is None:
+        sha1 = args.sha1
+        if sha1 is None:
+            m = hashlib.sha1()
+            m.update(data)
+            sha1 = m.hexdigest()
 
-    print("Using SHA-1:", sha1)
+        if sha1 is None:
+            raise Exception("A SHA-1 must be set to continue")
 
-    key1, key2, key3 = get_key_information(sha1)
-    if key1 is None:
-        raise Exception("Couldn't find key information for file with SHA-1 hash of %s" % (sha1))
+        print("Using SHA-1:", sha1)
+
+        key1, key2, key3 = get_key_information(sha1)
+        if key1 is None:
+            raise Exception("Couldn't find key information for file with SHA-1 hash of %s" % (sha1))
 
     if isinstance(key1, int) and isinstance(key2, int) and isinstance(key3, int):
         output_data = decrypt(data, key1, key2, key3)
@@ -192,6 +201,8 @@ def main():
 
     with open(args.output, "wb") as outfile:
         outfile.write(output_data)
+
+    print("Saved to", args.output)
 
 
 if __name__ == "__main__":
