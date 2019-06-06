@@ -1,8 +1,12 @@
 # cython: cdivision=True
 
+cdef rot(int c):
+    return ((c >> 7) & 1) | ((c << 1) & 0xff)
+
 
 cdef int is_bit_set(int value, int n):
     return (value >> n) & 1
+
 
 cdef int bit_swap(int v, int b15, int b14, int b13, int b12, int b11, int b10, int b9, int b8, int b7, int b6, int b5, int b4, int b3, int b2, int b1, int b0):
     return (is_bit_set(v, b15) << 15) | \
@@ -21,6 +25,7 @@ cdef int bit_swap(int v, int b15, int b14, int b13, int b12, int b11, int b10, i
         (is_bit_set(v, b2) << 2) | \
         (is_bit_set(v, b1) << 1) | \
         (is_bit_set(v, b0) << 0)
+
 
 cpdef bytearray decrypt(unsigned char *data, int data_len, unsigned short key1, unsigned short key2, unsigned char key3):
     cdef unsigned short v = 0
@@ -85,7 +90,7 @@ cpdef bytearray decrypt(unsigned char *data, int data_len, unsigned short key1, 
     return output_data
 
 
-cpdef bytearray decrypt_ddrsbm(unsigned char *data, int data_len, unsigned char *key, unsigned char *scramble, int key_len):
+cpdef bytearray decrypt_ddrsbm(unsigned char *data, int data_len, unsigned short key):
     cdef unsigned int output_idx = 0
     cdef unsigned int idx = 0
     cdef unsigned int even_bit_shift = 0
@@ -98,6 +103,33 @@ cpdef bytearray decrypt_ddrsbm(unsigned char *data, int data_len, unsigned char 
     cdef unsigned int output_word = 0
 
     output_data = bytearray(data_len * 2)
+    key_data = bytearray(16)
+
+    # Generate key data based on input key
+    key_state = is_bit_set(key, 0x0d) << 15 | \
+        is_bit_set(key, 0x0b) << 14 | \
+        is_bit_set(key, 0x09) << 13 | \
+        is_bit_set(key, 0x07) << 12 | \
+        is_bit_set(key, 0x05) << 11 | \
+        is_bit_set(key, 0x03) << 10 | \
+        is_bit_set(key, 0x01) << 9 | \
+        is_bit_set(key, 0x0f) << 8 | \
+        is_bit_set(key, 0x0e) << 7 | \
+        is_bit_set(key, 0x0c) << 6 | \
+        is_bit_set(key, 0x0a) << 5 | \
+        is_bit_set(key, 0x08) << 4 | \
+        is_bit_set(key, 0x06) << 3 | \
+        is_bit_set(key, 0x04) << 2 | \
+        is_bit_set(key, 0x02) << 1 | \
+        is_bit_set(key, 0x00) << 0
+
+    while idx < 8:
+        key_data[idx * 2] = key_state & 0xff
+        key_data[idx * 2 + 1] = (key_state >> 8) & 0xff
+
+        key_state = (rot(key_state >> 8) << 8) | rot(key_state & 0xff)
+
+        idx += 1
 
     while idx < data_len:
         output_word = 0
@@ -110,8 +142,8 @@ cpdef bytearray decrypt_ddrsbm(unsigned char *data, int data_len, unsigned char 
 
             is_even_bit_set = int((cur_data & (1 << even_bit_shift)) != 0)
             is_odd_bit_set = int((cur_data & (1 << odd_bit_shift)) != 0)
-            is_key_bit_set = int((key[idx % key_len] & (1 << cur_bit)) != 0)
-            is_scramble_bit_set = int((scramble[idx % key_len] & (1 << cur_bit)) != 0)
+            is_key_bit_set = int((key_data[idx % 16] & (1 << cur_bit)) != 0)
+            is_scramble_bit_set = int((key_data[(idx - 1) % 16] & (1 << cur_bit)) != 0)
 
             if is_scramble_bit_set == 1:
                 is_even_bit_set, is_odd_bit_set = is_odd_bit_set, is_even_bit_set
