@@ -1,5 +1,6 @@
 import argparse
 import ctypes
+import json
 import os
 import string
 import struct
@@ -12,7 +13,6 @@ def get_filename_hash(filename):
             hash = ctypes.c_int(((hash >> 31) & 0x4c11db7) ^ ((hash << 1) | ((ord(c) >> i) & 1))).value
 
     return hash & 0xffffffff
-
 
 def decrypt_data(data, input_key):
     def calculate_key(input):
@@ -99,8 +99,17 @@ def decode_lz(input_data):
 
 
 pccard_filenames = [
-    # Files from DDR
+    # General
     "boot/checksum.dat",
+    "checksum.dat",
+    "boot/psx.bin",
+    "boot/main.exe",
+    "data/main.exe",
+    "psx.bin",
+    "main.exe",
+    "config.dat",
+
+    # Files from DDR
     "data/fpga/fpga_mp3.bin",
     "data/mp3/mp3_tab.bin",
     "data/tim/wfont/wfont_w.bin",
@@ -140,53 +149,29 @@ pccard_filenames = [
     "ascii_size24.bin",
     "music_info.bin",
     "course_info.bin",
-    "group_list.bin", # Contains a list of files, can be parsed to get fcns listed below
+    "group_list.bin",
+    "jp_title.bin",
     "got11j1b.bin",
     "got11j0b.bin",
-    "got11h1f.bin",
+    "got11hlf.bin",
     "d_res_ns.dat",
     "d_ending.dat",
     "d_title.dat",
     "d_cautio.dat",
     "g_id.dat",
-
-    "system.fcn",
-    "msucheck.fcn",
-    "warning.fcn",
-    "entry.fcn",
-    "playstyl.fcn",
-    "shoprank.fcn",
-    "testmode.fcn",
-    "gamemode.fcn",
-    "ending.fcn",
-    "konamiid.fcn",
-    "card_ent.fcn",
-    "card_res.fcn",
-    "internet.fcn",
-    "scorernk.fcn",
-    "senddata.fcn",
-    "result.fcn",
-    "mus_sel.fcn",
-    "mode_sel.fcn",
-    "caution.fcn",
-    "hitchart.fcn",
-    "share_bg.fcn",
-    "puzzle.fcn",
-    "m_image.fcn",
-    "share.fcn",
-    "bgm0128.fcn",
+    "d_title_aa.dat",
+    "d_cautio_aa.dat",
+    "a.pak",
+    "system.vas",
 
     # Mambo a Gogo
-    "snapshot.img",
-
     "dl/n1/pathtab.bin",
     "data/kanji/eames.cmp",
     "data/spu/system.vas",
-    #"data/mp3/sample/",
-
     "soft/s573/overlay/bin/dbugtest.olb",
     "soft/s573/overlay/bin/gtest.olb",
     "soft/s573/overlay/bin/play.olb",
+    #"data/mp3/sample/",
     # "soft/s573/overlay/bin/fpga_mp3.olb", # There's a fpga_mp3_new.bin somewhere in here but I have no idea what filename it's using
 ]
 
@@ -363,6 +348,17 @@ def parse_mdb_filenames(data):
 
 
 # start GFDM data
+def parse_group_list_filenames(data):
+    hash_list_add = {}
+
+    for i in range(len(data) // 0x20):
+        filename = data[i*0x20:(i+1)*0x20].decode('ascii').strip('\0')
+
+        path = "%s.fcn" % (filename)
+        hash_list_add[get_filename_hash(path)] = path
+
+    return hash_list_add
+
 # end GFDM data
 
 # start Mambo a Gogo data
@@ -414,6 +410,7 @@ def read_file_table(filename, table_offset):
                 break
 
             files.append({
+                'idx': len(files),
                 'filename_hash': filename_hash,
                 'offset': offset * 0x800,
                 'filesize': filesize,
@@ -438,6 +435,7 @@ def read_file_table_mambo(filename, table_offset):
                 break
 
             files.append({
+                'idx': len(files),
                 'filename_hash': filename_hash,
                 'offset': offset * 0x800,
                 'filesize': filesize,
@@ -462,6 +460,7 @@ def read_file_table_gfdm(filename, table_offset):
                 break
 
             files.append({
+                'idx': len(files),
                 'filename_hash': filename_hash,
                 'offset': offset,
                 'filesize': filesize,
@@ -470,8 +469,8 @@ def read_file_table_gfdm(filename, table_offset):
                 'flag_enc': 0,
             })
 
-
     return files
+
 
 def get_file_data(fileinfo, enckey=None):
     card_filename = None
@@ -502,7 +501,7 @@ def get_file_data(fileinfo, enckey=None):
     if data and fileinfo['flag_comp'] == 1:
         data = decode_lz(data)
 
-    return data
+    return bytearray(data)
 
 
 if __name__ == "__main__":
@@ -511,7 +510,8 @@ if __name__ == "__main__":
     parser.add_argument('--input', help='Input folder', default=None, required=True)
     parser.add_argument('--output', help='Output folder', default="output")
     parser.add_argument('--key', help='Encryption key', choices=['EXTREME', 'EURO2', 'MAX2', 'DDR5', 'MAMBO'])
-    parser.add_argument('--type', help='Game Type', choices=['ddr', 'gfdm', 'mambo'])
+    parser.add_argument('--type', help='Game Type', choices=['ddr', 'gfdm-old', 'gfdm', 'mambo'])
+    parser.add_argument('--no-metadata', help='Do not save metadata file', default=False, action='store_true')
 
     args = parser.parse_args()
 
@@ -520,6 +520,9 @@ if __name__ == "__main__":
 
     if args.type == "ddr":
         files = read_file_table(os.path.join(args.input, "GAME.DAT"), 0xFE4000)
+
+    elif args.type == "gfdm-old":
+        files = read_file_table_gfdm(os.path.join(args.input, "GAME.DAT"), 0x180000)
 
     elif args.type == "gfdm":
         files = read_file_table_gfdm(os.path.join(args.input, "GAME.DAT"), 0x198000)
@@ -549,10 +552,26 @@ if __name__ == "__main__":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
                     hash_list.update(parse_mdb_mambo_filenames(get_file_data(fileinfo, args.key)))
 
-    for idx, fileinfo in enumerate(files):
-        output_filename = "output_%04d.bin" % idx
+            elif args.type in ["gfdm", "gfdm-old"]:
+                if hash_list[fileinfo['filename_hash']] == "group_list.bin":
+                    hash_list.update(parse_group_list_filenames(get_file_data(fileinfo, args.key)))
 
-        print(fileinfo)
+    for idx, fileinfo in enumerate(files):
+        if fileinfo['filename_hash'] in hash_list:
+            if args.type in ["ddr", "mambo"]:
+                if hash_list[fileinfo['filename_hash']] == "data/tex/rembind.bin":
+                    hash_list.update(parse_rembind_filenames(get_file_data(fileinfo, args.key)))
+
+            if args.type == "ddr":
+                if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
+                    hash_list.update(parse_mdb_filenames(get_file_data(fileinfo, args.key)))
+
+            elif args.type == "mambo":
+                if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
+                    hash_list.update(parse_mdb_mambo_filenames(get_file_data(fileinfo, args.key)))
+
+    for idx, fileinfo in enumerate(files):
+        output_filename = "_output_%08x.bin" % (fileinfo['filename_hash'])
 
         if fileinfo['offset'] == 0x7c0000:
             print("%08x" % fileinfo['offset'], fileinfo)
@@ -563,23 +582,25 @@ if __name__ == "__main__":
             if output_filename.startswith("/"):
                 output_filename = "_" + output_filename[1:]
 
-            output_filename = os.path.join(args.output, output_filename)
-
-            print("Extracting", output_filename)
-
-            filepath = os.path.dirname(output_filename)
-            if not os.path.exists(filepath):
-                os.makedirs(filepath)
-
-            with open(output_filename, "wb") as outfile:
-                data = get_file_data(fileinfo, args.key)
-                outfile.write(data)
-
         else:
-            print("Found unknown hash: %08x" % fileinfo['filename_hash'])
+            print("Unknown hash %08x" % fileinfo['filename_hash'], output_filename)
 
-            output_filename = os.path.join(args.output, output_filename)
+        files[idx]['filename'] = output_filename
 
-            with open(output_filename, "wb") as outfile:
-                data = get_file_data(fileinfo, args.key)
-                outfile.write(data)
+        output_filename = os.path.join(args.output, output_filename)
+
+        if os.path.exists(output_filename):
+            continue
+
+        filepath = os.path.dirname(output_filename)
+        if not os.path.exists(filepath):
+            os.makedirs(filepath)
+
+        print(fileinfo)
+        print("Extracting", output_filename)
+        with open(output_filename, "wb") as outfile:
+            data = get_file_data(fileinfo, args.key)
+            outfile.write(data)
+
+    if not args.no_metadata:
+        json.dump(files, open(os.path.join(args.output, "_metadata.json"), "w"), indent=4)
