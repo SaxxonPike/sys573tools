@@ -472,16 +472,20 @@ def read_file_table_gfdm(filename, table_offset):
     return files
 
 
-def get_file_data(fileinfo, enckey=None):
+def get_file_data(input_folder, fileinfo, enckey=None):
     card_filename = None
 
-    if os.path.exists("PCCARD.DAT"):
-        card_filename = "PCCARD.DAT"
+    game_path = os.path.join(input_folder, "GAME.DAT")
+    pccard_path = os.path.join(input_folder, "PCCARD.DAT")
+    card_path = os.path.join(input_folder, "CARD.DAT")
 
-    elif os.path.exists("CARD.DAT"):
-        card_filename = "CARD.DAT"
+    if os.path.exists(pccard_path):
+        card_filename = pccard_path
 
-    game = open("GAME.DAT", "rb") if os.path.exists("GAME.DAT") else None
+    elif os.path.exists(card_path):
+        card_filename = card_path
+
+    game = open(game_path, "rb") if os.path.exists(game_path) else None
     card = open(card_filename, "rb") if card_filename else None
 
     data = None
@@ -499,7 +503,11 @@ def get_file_data(fileinfo, enckey=None):
         data = decrypt_data(data, enckey)
 
     if data and fileinfo['flag_comp'] == 1:
-        data = decode_lz(data)
+        try:
+            data = decode_lz(data)
+
+        except:
+            pass
 
     return bytearray(data)
 
@@ -542,33 +550,33 @@ if __name__ == "__main__":
         if fileinfo['filename_hash'] in hash_list:
             if args.type in ["ddr", "mambo"]:
                 if hash_list[fileinfo['filename_hash']] == "data/tex/rembind.bin":
-                    hash_list.update(parse_rembind_filenames(get_file_data(fileinfo, args.key)))
+                    hash_list.update(parse_rembind_filenames(get_file_data(args.input, fileinfo, args.key)))
 
             if args.type == "ddr":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
-                    hash_list.update(parse_mdb_filenames(get_file_data(fileinfo, args.key)))
+                    hash_list.update(parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key)))
 
             elif args.type == "mambo":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
-                    hash_list.update(parse_mdb_mambo_filenames(get_file_data(fileinfo, args.key)))
+                    hash_list.update(parse_mdb_mambo_filenames(get_file_data(args.input, fileinfo, args.key)))
 
             elif args.type in ["gfdm", "gfdm-old"]:
                 if hash_list[fileinfo['filename_hash']] == "group_list.bin":
-                    hash_list.update(parse_group_list_filenames(get_file_data(fileinfo, args.key)))
+                    hash_list.update(parse_group_list_filenames(get_file_data(args.input, fileinfo, args.key)))
 
     for idx, fileinfo in enumerate(files):
         if fileinfo['filename_hash'] in hash_list:
             if args.type in ["ddr", "mambo"]:
                 if hash_list[fileinfo['filename_hash']] == "data/tex/rembind.bin":
-                    hash_list.update(parse_rembind_filenames(get_file_data(fileinfo, args.key)))
+                    hash_list.update(parse_rembind_filenames(get_file_data(args.input, fileinfo, args.key)))
 
             if args.type == "ddr":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
-                    hash_list.update(parse_mdb_filenames(get_file_data(fileinfo, args.key)))
+                    hash_list.update(parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key)))
 
             elif args.type == "mambo":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
-                    hash_list.update(parse_mdb_mambo_filenames(get_file_data(fileinfo, args.key)))
+                    hash_list.update(parse_mdb_mambo_filenames(get_file_data(args.input, fileinfo, args.key)))
 
     for idx, fileinfo in enumerate(files):
         output_filename = "_output_%08x.bin" % (fileinfo['filename_hash'])
@@ -599,7 +607,7 @@ if __name__ == "__main__":
         print(fileinfo)
         print("Extracting", output_filename)
         with open(output_filename, "wb") as outfile:
-            data = get_file_data(fileinfo, args.key)
+            data = get_file_data(args.input, fileinfo, args.key)
             outfile.write(data)
 
     if not args.no_metadata:
