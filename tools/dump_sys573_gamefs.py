@@ -140,6 +140,9 @@ pccard_filenames = [
     "data/mcard/japa/pages.bin",
     "data/mcard/engl/pagel.bin",
     "data/mcard/japa/pagel.bin",
+    "data/mcard/page2e.txt",
+    "data/mcard/page1e.txt",
+    "data/mcard/page0e.txt",
 
     # From GFDM
     "fpga_mp3.bin",
@@ -185,7 +188,7 @@ for filename in ['hwrlja', 'hwfroa', 'hwnora', 'hwhaja']:
     pccard_filenames.append("data/movie/howto/%s.sbs" % filename)
 
 for filename in ["x"] + ["cos%02d" % x for x in range(0, 100)] + ["non%02d" % x for x in range(0, 100)]:
-    for part in ['nm', 'in', 'ta', 'th', 'bk']:
+    for part in ['cd', 'nm', 'in', 'ta', 'th', 'bk']:
         for ext in ['cmt', 'tim']:
             pccard_filenames.append("data/course/%s_%s.%s" % (filename, part, ext))
 
@@ -293,12 +296,14 @@ song_table = [
     "twen", "inst", "name", "rank", "scal", "selc", "sele", "stae", "staf",
 ]
 
+ddr_common_exts = ['cmt', 'tim', 'cms', 'lmp', 'per', 'csq', 'ssq']
 for filename in song_table:
-    pccard_filenames.append("data/mdb/%s/all.csq" % filename)
-    pccard_filenames.append("data/mdb/%s/all.ssq" % filename)
+    for ext in ddr_common_exts:
+        pccard_filenames.append("data/mdb/%s/all.%s" % (filename, ext))
+        pccard_filenames.append("data/mdb/%s/%s.%s" % (filename, filename, ext))
 
-    for part in ['nm', 'in', 'ta', 'th', 'bk']:
-        for ext in ['cmt', 'tim']:
+    for part in ['cd', 'nm', 'in', 'ta', 'th', 'bk']:
+        for ext in ddr_common_exts:
             pccard_filenames.append("data/mdb/%s/%s_%s.%s" % (filename, filename, part, ext))
 
 anim_table = ['mfjc1', 'mfjb1', 'mfja1', 'mljc1', 'mljb1', 'mlja1', 'mrsc1', 'mrsb1', 'mrsa1', 'mfsc1', 'mfsb1', 'mfsa1', 'mbsc1', 'mbsb1', 'mbsa1', 'mlsc1', 'mlsb1', 'mlsa1', 'mnor1']
@@ -320,60 +325,31 @@ def parse_rembind_filenames(data):
     return hash_list_add
 
 
-def parse_mdb_filenames(data):
+def parse_mdb_filenames(data, entry_size):
     hash_list_add = {}
 
-    for i in range(len(data) // 0x80):
-        if data[i*0x80] == 0:
+    for i in range(len(data) // entry_size):
+        if data[i*entry_size] == 0:
             break
 
-        filename = data[i*0x80:i*0x80+6].decode('ascii').strip('\0').strip()
+        filename = data[i*entry_size:i*entry_size+6].decode('ascii').strip('\0').strip()
 
         if filename in song_table:
             continue
 
         print(filename)
 
-        path = "data/mdb/%s/all.csq" % filename
-        hash_list_add[get_filename_hash(path)] = path
+        for ext in ddr_common_exts:
+            path = "data/mdb/%s/all.%s" % (filename, ext)
+            hash_list_add[get_filename_hash(path)] = path
 
-        path = "data/mdb/%s/all.ssq" % filename
-        hash_list_add[get_filename_hash(path)] = path
-
-        for part in ['nm', 'in', 'ta', 'th', 'bk']:
-            for ext in ['cmt', 'tim']:
+        for part in ['cd', 'nm', 'in', 'ta', 'th', 'bk']:
+            for ext in ddr_common_exts:
                 path = "data/mdb/%s/%s_%s.%s" % (filename, filename, part, ext)
                 hash_list_add[get_filename_hash(path)] = path
 
     return hash_list_add
 
-
-def parse_oldmdb_filenames(data):
-    hash_list_add = {}
-
-    for i in range(len(data) // 0x38):
-        if data[i*0x38] == 0:
-            break
-
-        filename = data[i*0x38:i*0x38+6].decode('ascii').strip('\0').strip()
-
-        if filename in song_table:
-            continue
-
-        print(filename)
-
-        path = "data/mdb/%s/all.csq" % filename
-        hash_list_add[get_filename_hash(path)] = path
-
-        path = "data/mdb/%s/all.ssq" % filename
-        hash_list_add[get_filename_hash(path)] = path
-
-        for part in ['nm', 'in', 'ta', 'th', 'bk']:
-            for ext in ['cmt', 'tim']:
-                path = "data/mdb/%s/%s_%s.%s" % (filename, filename, part, ext)
-                hash_list_add[get_filename_hash(path)] = path
-
-    return hash_list_add
 # end DDR data
 
 
@@ -584,10 +560,10 @@ if __name__ == "__main__":
 
             if args.type == "ddr":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
-                    hash_list.update(parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key)))
+                    hash_list.update(parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x80))
 
                 elif hash_list[fileinfo['filename_hash']] in ["data/mdb/ja_mdb.bin", "data/mdb/ka_mdb.bin", "data/mdb/aa_mdb.bin"]:
-                    hash_list.update(parse_oldmdb_filenames(get_file_data(args.input, fileinfo, args.key)))
+                    hash_list.update(parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x38))
 
             elif args.type == "mambo":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
