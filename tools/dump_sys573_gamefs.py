@@ -14,6 +14,28 @@ def get_filename_hash(filename):
 
     return hash & 0xffffffff
 
+
+def get_bruteforced_filenames(input_hash):
+    import itertools
+
+    filenames = []
+
+    for length in range(0, 6):
+        for s in [p for p in itertools.product(string.ascii_lowercase, repeat=length)]:
+            for ext in ["bin", "dat", "exe"]:
+                filename = "s573/%s.%s" % (s, ext)
+
+                if get_filename_hash(filename) == input_hash:
+                    print(filename)
+                    filenames.append(filename)
+
+    exit(1)
+
+    return filenames
+
+# get_bruteforced_filenames(0x8d3d1760)
+
+
 def decrypt_data(data, input_key):
     def calculate_key(input):
         key = 0
@@ -99,24 +121,14 @@ def decode_lz(input_data):
 
 
 pccard_filenames = [
-    # General
-    "boot/checksum.dat",
-    "checksum.dat",
-    "boot/psx.bin",
-    "boot/main.exe",
-    "data/main.exe",
-    "psx.bin",
-    "main.exe",
-    "config.dat",
-
     # Files from DDR
-    "data/fpga/fpga_mp3.bin",
     "data/mp3/mp3_tab.bin",
     "data/tim/wfont/wfont_w.bin",
     "data/mdb/mdb.bin",
     "data/mdb/ja_mdb.bin",
     "data/mdb/aa_mdb.bin",
     "data/mdb/ka_mdb.bin",
+    "data/mdb/ea_mdb.bin",
     "data/tex/rembind.bin",
     "data/tex/subbind.bin",
     "data/chara/inst_s/inst_s.cmt",
@@ -125,8 +137,10 @@ pccard_filenames = [
     "data/course/onimode.ssq",
     "data/mp3/enc/M81D7HHJ.DAT", # Dance Dance Revolution from Extreme is stored in the card data, unlike every other song in the game
     "data/chara/inst/inst.ctx",
+    "data/chara/inst/inst.pos",
     "data/motion/inst/inst.cmm",
     "data/chara/chara.pos",
+    "data/chara/chara.ctx",
     "data/chara/inst_s/inst_s.pos",
     "data/chara/inst_d/inst_d.pos",
     "data/chara/chara.lst",
@@ -136,16 +150,100 @@ pccard_filenames = [
     "data/chara/inst_s/inst_s.lst",
     "data/chara/inst_d/inst_d.tmd",
     "data/chara/inst_d/inst_d.lst",
-    "data/mcard/engl/pages.bin",
-    "data/mcard/japa/pages.bin",
-    "data/mcard/engl/pagel.bin",
-    "data/mcard/japa/pagel.bin",
     "data/mcard/page2e.txt",
     "data/mcard/page1e.txt",
     "data/mcard/page0e.txt",
+    "data/mcard/page2j.txt",
+    "data/mcard/page1j.txt",
+    "data/mcard/page0j.txt",
+    "data/mcard/page2k.txt",
+    "data/mcard/page1k.txt",
+    "data/mcard/page0k.txt",
+    "data/tim/allcd/alcda0.cmt",
+    "data/all/texbind.bin",
+    "data/back/caut/cautj_25.cmt",
+    "data/back/caut/cautk_25.cmt",
+    "data/back/caut/caute_25.cmt",
+    "data/back/caut/cauta_25.cmt",
+    "data/back/demo/unist_25.cmt",
+
+    # Remove dupes!!
+    "data/fpga/fpga_mp3.bin",
+    "data/mdb/ja_mdb.bin",
+    "data/mdb/aa_mdb.bin",
+    "data/back/caut/cautj_25.cmt",
+    "data/back/caut/caute_25.cmt",
+    "data/back/caut/cautf_25.cmt",
+    "data/back/caut/cautg_25.cmt",
+    "data/back/caut/cauti_25.cmt",
+    "data/back/caut/cauts_25.cmt",
+    "data/movie/titlemv.str",
+    "sd/data/scale.vab",
+    "sd/data/close.vab",
+    "sd/data/end.vab",
+    "sd/data/dj_fail5.vab",
+    "sd/data/dj_fail4.vab",
+    "sd/data/dj_fail3.vab",
+    "sd/data/dj_fail2.vab",
+    "sd/data/dj_fail1.vab",
+    "sd/data/dj_chr5.vab",
+    "sd/data/dj_chr4.vab",
+    "sd/data/dj_chr3.vab",
+    "sd/data/dj_chr2.vab",
+    "sd/data/dj_chr1.vab",
+    "sd/data/dj_clr4.vab",
+    "sd/data/dj_clr3.vab",
+    "sd/data/dj_clr2.vab",
+    "sd/data/dj_clr1.vab",
+    "sd/data/game2.vab",
+    "sd/data/game1.vab",
+    "sd/data/multi.vab",
+    "sd/data/dj_st_c5.vab",
+    "sd/data/dj_st_c4.vab",
+    "sd/data/dj_st_c3.vab",
+    "sd/data/dj_st_c2.vab",
+    "sd/data/dj_st_c1.vab",
+    "sd/data/dj_slct7.vab",
+    "sd/data/dj_slct6.vab",
+    "sd/data/dj_slct5.vab",
+    "sd/data/dj_slct4.vab",
+    "sd/data/dj_slct3.vab",
+    "sd/data/dj_slct2.vab",
+    "sd/data/dj_slct1.vab",
+    "sd/data/in_demo.vab",
+    "sd/data/out_demo.vab",
+    "sd/data/monitor.vab",
+    "sd/data/jochu.vab",
+    "data/all/inst.tmd",
+    "data/all/inst.lst",
+    "data/all/inst.tex",
+    "data/all/texbind.bin",
+    "data/texture/banner/banner00.cmt",
+    "data/motion/inst/inst.cmm",
+    "data/motion/prac/prac.cmm",
+    "data/chara/inst/inst.tmd",
+    "data/chara/inst/inst.lst",
+    "data/chara/chara.pos",
+    "data/chara/inst/inst.pos",
+    "data/chara/chara.lst",
+    "data/chara/inst/inst.tmd",
+    "data/chara/inst/inst.lst",
+    "data/area/area/titl2_25.cmt",
+    "data/area/area/title.cmt",
+    "data/area/area/titls_25.cmt",
+    "data/tim/allcd/alcda0.cmt",
+    "data/chara/inst/inst.ctx",
+    "data/area/area/prac_25.cmt",
+    "data/tim/wfont/wfont_w.bin",
+    "data/area/area/cobk_25.cmt",
+    "data/area/area/kicbk_25.cmt",
+    "data/vab/ddr3.lst",
+    "data/vab/ddr3.vas",
+    "data/back/game/iron_25.cmt",
+
+    # /Remove dupes!!
 
     # From GFDM
-    "fpga_mp3.bin",
     "ir_id.bin",
     "net_id.bin",
     "kfont8.bin",
@@ -176,9 +274,19 @@ pccard_filenames = [
     "soft/s573/overlay/bin/dbugtest.olb",
     "soft/s573/overlay/bin/gtest.olb",
     "soft/s573/overlay/bin/play.olb",
-    #"data/mp3/sample/",
-    # "soft/s573/overlay/bin/fpga_mp3.olb", # There's a fpga_mp3_new.bin somewhere in here but I have no idea what filename it's using
+    "soft/s573/overlay/bin/fpga_mp3.olb", # There's a fpga_mp3_new.bin somewhere in here but I have no idea what filename it's using
 ]
+
+ddr_common_exts = ['cmt', 'tim', 'cms', 'lmp', 'per', 'csq', 'ssq', 'cmm', 'bin', 'exe', 'dat', 'olb', 'rom', 'pos', 'ctx', 'lst', 'tmd', 'vas', 'cmp', 'vab']
+ddr_common_regions = ['span', 'ital', 'germ', 'fren', 'engl', 'japa', 'kore']
+
+
+common_filenames = ['checksum', 'psx', 'main', 'config', 'fpga_mp3', 'boot']
+common_paths = ['', 'boot', 's573', 'data', 'data/fpga']
+for filename in common_filenames:
+    for path in common_paths:
+        for ext in ddr_common_exts:
+            pccard_filenames.append("/".join([path, "%s.%s" % (filename, ext)]))
 
 # start DDR data
 for filename in ['cddana', 'scrob_25', 'scrbk_16', 're2424', 'acxx28', 'ccsaca', 'ccrgca', 'ccltaa', 'ccitaa', 'ccheaa', 'ccdrga', 'ccddra', 'cccuba', 'ccclma', 'ccclca', 'title']:
@@ -296,7 +404,17 @@ song_table = [
     "twen", "inst", "name", "rank", "scal", "selc", "sele", "stae", "staf",
 ]
 
-ddr_common_exts = ['cmt', 'tim', 'cms', 'lmp', 'per', 'csq', 'ssq']
+for region in ddr_common_regions:
+    pccard_filenames.append("data/mcard/%s/pages.bin" % region)
+
+    for i in range(0, 10):
+        pccard_filenames.append("data/mcard/%s/page%d.bin" % (region, i))
+
+    pccard_filenames.append("data/mcard/%s/titl2_25.cmt" % region)
+    pccard_filenames.append("data/mcard/%s/title.cmt" % region)
+    pccard_filenames.append("data/mcard/%s/titls_25.cmt" % region)
+    pccard_filenames.append("data/mcard/%s/unist_25.cmt" % region)
+
 for filename in song_table:
     for ext in ddr_common_exts:
         pccard_filenames.append("data/mdb/%s/all.%s" % (filename, ext))
@@ -311,14 +429,26 @@ for filename in anim_table:
     pccard_filenames.append("data/anime/%s/%s.can" % (filename, filename))
     pccard_filenames.append("data/anime/%s/%s.anm" % (filename, filename))
 
+ddr_motion_table = ['wave2', 'wave1', 'y31', 'y11', 'thouse3', 'thouse2', 'soul2', 'soul1', 'sino_', 'n31', 'mhouse1', 'lock1', 'jazz2', 'jazz1', 'hopping1', 'hiphop2', 'hiphop1', 'capoera1', 'normal']
+for motion in ddr_motion_table:
+    for ext in ddr_common_exts:
+        pccard_filenames.append("data/motion/%s/%s.%s" % (motion, motion, ext))
+
+
 def parse_rembind_filenames(data):
     hash_list_add = {}
     entries = len(data) // 0x30
 
     for i in range(entries):
-        for region in ['span', 'ital', 'germ', 'fren', 'engl', 'japa']:
-            filename = data[i*0x30+0x10:i*0x30+0x28].decode('ascii').strip('\0')
-            filename = "data/%s.cmt" % filename
+        filename_len = 0
+
+        while filename_len + 0x10 < 0x30 and data[i*0x30+0x10+filename_len] != 0:
+            filename_len += 1
+
+        orig_filename = data[i*0x30+0x10:i*0x30+0x10+filename_len].decode('ascii').strip('\0')
+
+        for region in ddr_common_regions:
+            filename = "data/%s.cmt" % orig_filename
             filename = filename.replace("japa/", "%s/" % region)
             hash_list_add[get_filename_hash(filename)] = filename
 
@@ -336,8 +466,6 @@ def parse_mdb_filenames(data, entry_size):
 
         if filename in song_table:
             continue
-
-        print(filename)
 
         for ext in ddr_common_exts:
             path = "data/mdb/%s/all.%s" % (filename, ext)
@@ -555,14 +683,14 @@ if __name__ == "__main__":
     for idx, fileinfo in enumerate(files):
         if fileinfo['filename_hash'] in hash_list:
             if args.type in ["ddr", "mambo"]:
-                if hash_list[fileinfo['filename_hash']] == "data/tex/rembind.bin":
+                if hash_list[fileinfo['filename_hash']] in ["data/tex/rembind.bin", "data/all/texbind.bin"]:
                     hash_list.update(parse_rembind_filenames(get_file_data(args.input, fileinfo, args.key)))
 
             if args.type == "ddr":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
                     hash_list.update(parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x80))
 
-                elif hash_list[fileinfo['filename_hash']] in ["data/mdb/ja_mdb.bin", "data/mdb/ka_mdb.bin", "data/mdb/aa_mdb.bin"]:
+                elif hash_list[fileinfo['filename_hash']] in ["data/mdb/ja_mdb.bin", "data/mdb/ka_mdb.bin", "data/mdb/aa_mdb.bin", "data/mdb/ea_mdb.bin"]:
                     hash_list.update(parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x38))
 
             elif args.type == "mambo":
