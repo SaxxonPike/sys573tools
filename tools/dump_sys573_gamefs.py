@@ -115,6 +115,8 @@ pccard_filenames = [
     "data/tim/wfont/wfont_w.bin",
     "data/mdb/mdb.bin",
     "data/mdb/ja_mdb.bin",
+    "data/mdb/aa_mdb.bin",
+    "data/mdb/ka_mdb.bin",
     "data/tex/rembind.bin",
     "data/tex/subbind.bin",
     "data/chara/inst_s/inst_s.cmt",
@@ -344,6 +346,34 @@ def parse_mdb_filenames(data):
                 hash_list_add[get_filename_hash(path)] = path
 
     return hash_list_add
+
+
+def parse_oldmdb_filenames(data):
+    hash_list_add = {}
+
+    for i in range(len(data) // 0x38):
+        if data[i*0x38] == 0:
+            break
+
+        filename = data[i*0x38:i*0x38+6].decode('ascii').strip('\0').strip()
+
+        if filename in song_table:
+            continue
+
+        print(filename)
+
+        path = "data/mdb/%s/all.csq" % filename
+        hash_list_add[get_filename_hash(path)] = path
+
+        path = "data/mdb/%s/all.ssq" % filename
+        hash_list_add[get_filename_hash(path)] = path
+
+        for part in ['nm', 'in', 'ta', 'th', 'bk']:
+            for ext in ['cmt', 'tim']:
+                path = "data/mdb/%s/%s_%s.%s" % (filename, filename, part, ext)
+                hash_list_add[get_filename_hash(path)] = path
+
+    return hash_list_add
 # end DDR data
 
 
@@ -555,6 +585,9 @@ if __name__ == "__main__":
             if args.type == "ddr":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
                     hash_list.update(parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key)))
+
+                elif hash_list[fileinfo['filename_hash']] in ["data/mdb/ja_mdb.bin", "data/mdb/ka_mdb.bin", "data/mdb/aa_mdb.bin"]:
+                    hash_list.update(parse_oldmdb_filenames(get_file_data(args.input, fileinfo, args.key)))
 
             elif args.type == "mambo":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
