@@ -105,11 +105,13 @@ common_extensions = [
 ]
 
 mambo_common_extensions = [
-    'bin', 'cmp', 'vas', 'olb', 'pup'
+    'bin.new', 'cmp', 'vas', 'olb', 'pup', 'cpr'
 ]
 
 ddr_common_extensions = [
-    'cmt', 'tim', 'cms', 'lmp', 'per', 'csq', 'ssq', 'cmm', 'pos', 'ctx', 'lst', 'tmd', 'vab', 'sbs', 'can', 'anm'
+    'cmt', 'tim', 'cms', 'lmp', 'per', 'csq', 'ssq', 'cmm',
+    'pos', 'ctx', 'lst', 'tmd', 'vab', 'sbs', 'can', 'anm',
+    'lpe', 'mbk', 'lz', 'bs', 'txt', 'tan'
 ]
 
 gfdm_common_extensions = [
@@ -123,7 +125,7 @@ ddr_common_regions = [
 ]
 
 ddr_common_parts = [
-    'cd', 'nm', 'in', 'ta', 'th', 'bk'
+    'cd', 'nm', 'in', 'ta', 'th', 'bk', 'fr', '25'
 ]
 
 
@@ -150,6 +152,30 @@ def generate_data_paths(hash_list={}):
         "data/area/area/titl2_25.cmt",
         "data/area/area/title.cmt",
         "data/area/area/titls_25.cmt",
+        "data/area/area_ua/cobk_25.cmt",
+        "data/area/area_ua/kicbk_25.cmt",
+        "data/area/area_ua/prac_25.cmt",
+        "data/area/area_ua/titl2_25.cmt",
+        "data/area/area_ua/title.cmt",
+        "data/area/area_ua/titls_25.cmt",
+        "data/area/area_ja/cobk_25.cmt",
+        "data/area/area_ja/kicbk_25.cmt",
+        "data/area/area_ja/prac_25.cmt",
+        "data/area/area_ja/titl2_25.cmt",
+        "data/area/area_ja/title.cmt",
+        "data/area/area_ja/titls_25.cmt",
+        "data/area/area_ea/cobk_25.cmt",
+        "data/area/area_ea/kicbk_25.cmt",
+        "data/area/area_ea/prac_25.cmt",
+        "data/area/area_ea/titl2_25.cmt",
+        "data/area/area_ea/title.cmt",
+        "data/area/area_ea/titls_25.cmt",
+        "data/area/area_ka/cobk_25.cmt",
+        "data/area/area_ka/kicbk_25.cmt",
+        "data/area/area_ka/prac_25.cmt",
+        "data/area/area_ka/titl2_25.cmt",
+        "data/area/area_ka/title.cmt",
+        "data/area/area_ka/titls_25.cmt",
         "data/back/caut/cauta_25.cmt",
         "data/back/caut/caute_25.cmt",
         "data/back/caut/cautf_25.cmt",
@@ -187,10 +213,14 @@ def generate_data_paths(hash_list={}):
         "data/mcard/page2e.txt",
         "data/mcard/page2j.txt",
         "data/mcard/page2k.txt",
+        "data/mcard/page0.txt",
+        "data/mcard/page1.txt",
+        "data/mcard/page2.txt",
         "data/mdb/aa_mdb.bin",
         "data/mdb/ea_mdb.bin",
         "data/mdb/ja_mdb.bin",
         "data/mdb/ka_mdb.bin",
+        "data/mdb/ua_mdb.bin",
         "data/mdb/mdb.bin",
         "data/motion/inst/inst.cmm",
         "data/motion/prac/prac.cmm",
@@ -202,10 +232,18 @@ def generate_data_paths(hash_list={}):
         "data/tex/subbind.bin",
         "data/texture/banner/banner00.cmt",
         "data/tim/allcd/alcda0.cmt",
+        "data/tim/allcd/alcdu0.cmt",
+        "data/tim/allcd/alcde0.cmt",
+        "data/tim/allcd/alcdj0.cmt",
+        "data/tim/allcd/alcdk0.cmt",
         "data/tim/wfont/wfont_w.bin",
         "data/vab/ddr3.lst",
         "data/vab/ddr3.vas",
+        "data/vab/ddrusa.lst",
+        "data/vab/ddrusa.vas",
         "dl/n1/pathtab.bin",
+        "dl/pathtab.bin",
+        "pathtab.bin",
         "g_id.dat",
         "got11hlf.bin",
         "got11j0b.bin",
@@ -257,7 +295,29 @@ def generate_data_paths(hash_list={}):
         "soft/s573/overlay/bin/gtest.olb",
         "soft/s573/overlay/bin/play.olb",
         "system.vas",
+
+        "cube0.bin",
+        "cube1.bin",
+        "mdb.bin",
+        "courseboss.bin",
+        "ircourse.bin",
+        "course.bin",
+        "fontdb.bin",
+        "arrangement_data.bin",
+        "object_2d_data.bin",
+        "ja_mdb.bin",
+        "marathoncourse.bin",
+        "font08.bin",
+        "font16.bin",
+        "font24.bin",
+        "font32.bin",
+        "font04.bin",
+        "dmx2.vas",
+        "dmx.vas",
     ]
+
+    for i in range(0, 100):
+        pccard_filenames.append("data/back/game/chr/%08d_25.cmt" % i)
 
     common_filenames = [
         'checksum', 'psx', 'main', 'config', 'fpga_mp3', 'boot'
@@ -270,23 +330,50 @@ def generate_data_paths(hash_list={}):
     ddr_movie_filenames = [
         'cddana', 'scrob_25', 'scrbk_16', 're2424', 'acxx28', 'ccsaca', 'ccrgca', 'ccltaa',
         'ccitaa', 'ccheaa', 'ccdrga', 'ccddra', 'cccuba', 'ccclma', 'ccclca', 'title',
-        'hwrlja', 'hwfroa', 'hwnora', 'hwhaja'
+        'hwrlja', 'hwfroa', 'hwnora', 'hwhaja',
+        'jutrah', 'jutrag', 'jutraf', 'jutrae', 'jutrad', 'jutrac', 'jutrab', 'jutraa', 'justri', 'justrh', 'justrg',
+        'justrf', 'justre', 'justrd', 'justrc', 'justrb', 'justra', 'juspka', 'juspib', 'juspia', 'jusech', 'jusecg',
+        'jusecf', 'jusece', 'jusecd', 'jusecc', 'jusecb', 'juseca', 'jurbab', 'jurbaa', 'junycb', 'junyca', 'juhrta',
+        'juhrda', 'juhpla', 'juhmsa', 'juhmra', 'juhmma', 'juhmfa', 'juhgra', 'juhbga', 'jufdcb', 'jufdca', 'jszxca',
+        'jsytra', 'jsxrpa', 'jswwwa', 'jswsxa', 'jsuioa', 'jstusa', 'jstrea', 'jstasa', 'jssssa', 'jssiba', 'jsrewa',
+        'jsprza', 'jspora', 'jspaua', 'jskera', 'jskeba', 'jsjkla', 'jshjka', 'jsghja', 'jsgfda', 'jsfufa', 'jsfdsa',
+        'jsewqa', 'jsenea', 'jseeee', 'jsdsaa', 'jsdima', 'jsddda', 'jsdaba', 'jsdaaa', 'jsccca', 'jsbeba', 'jsbbba',
+        'jsaaaa', 'jrwird', 'jrwira', 'jruzuc', 'jruzub', 'jruzua', 'jrtryt', 'jrsupb', 'jrsupa', 'jrsumb', 'jrsuma',
+        'jrssma', 'jrsmra', 'jrskya', 'jrsawa', 'jrlina', 'jrjazd', 'jrjazc', 'jrjazb', 'jrjaza', 'jrgnma', 'jrfsea',
+        'jrdria', 'jrcusa', 'jrcupa', 'jrcrba', 'jrcndd', 'jrcndb', 'jrcnda', 'jrcmab', 'jrcmaa', 'jrcarb', 'jrbapa',
+        'jmswrp', 'jmpaxt', 'jmparu', 'jmpahb', 'jmpaha', 'jmpabf', 'jmpaab', 'jmpaaa', 'jmlobb', 'jmloba', 'jmline',
+        'jmkatb', 'jmkata', 'jmglow', 'jmflcb', 'jmflca', 'jmfilm', 'jmfcub', 'jmfcua', 'jmefil', 'jmcufb', 'jmcufa',
+        'jmcubs', 'jmcubk', 'jfwrdd', 'jfwrdc', 'jfwrdb', 'jfwrda', 'jfwirc', 'jfwira', 'jfttma', 'jftrnd', 'jftrnb',
+        'jftrna', 'jfsana', 'jfpiwa', 'jfpara', 'jfmjba', 'jfmecb', 'jfmeca', 'jflngb', 'jflnga', 'jflita', 'jfldac',
+        'jfkoac', 'jfkkzb', 'jfinaa', 'jfhtaa', 'jffrga', 'jfctmb', 'jfctma', 'jfclib', 'jfclia', 'jfbfud', 'jfbfuc',
+        'jfbfub', 'jfbfua', 'jewawa', 'jetopb', 'jetopa', 'jetono', 'jethdc', 'jethdb', 'jethda', 'jetcla', 'jestra',
+        'jesnwb', 'jesnwa', 'jerain', 'jepusb', 'jepusa', 'jepmpa', 'jepina', 'jenmma', 'jeninf', 'jeninc', 'jenina',
+        'jekara', 'jejete', 'jeifee', 'jeifec', 'jeifeb', 'jehnaa', 'jehgla', 'jehall', 'jegara', 'jegaku', 'jeflgb',
+        'jeelea', 'jeearo', 'jedjtb', 'jedjta', 'jecupa', 'jecara', 'jeblea', 'jebkha'
     ]
 
     ddr_movie_paths = [
         'common', 'howto'
     ]
 
-    ddr_anime_filenames = [
-        'mfjc1', 'mfjb1', 'mfja1', 'mljc1', 'mljb1', 'mlja1', 'mrsc1', 'mrsb1',
-        'mrsa1', 'mfsc1', 'mfsb1', 'mfsa1', 'mbsc1', 'mbsb1', 'mbsa1', 'mlsc1',
-        'mlsb1', 'mlsa1', 'mnor1'
+    ddr_anime_base_filenames = [
+        'mfjc', 'mfjb', 'mfja', 'mljc', 'mljb', 'mlja', 'mrsc', 'mrsb',
+        'mrsa', 'mfsc', 'mfsb', 'mfsa', 'mbsc', 'mbsb', 'mbsa', 'mlsc',
+        'mlsb', 'mlsa', 'mnor'
     ]
 
+    ddr_anime_filenames = []
+    for x in ddr_anime_base_filenames:
+        for i in range(0, 10):
+            ddr_anime_filenames.append("%s%d" % (x, i))
+
     ddr_motion_filenames = [
-        'wave2', 'wave1', 'y31', 'y11', 'thouse3', 'thouse2', 'soul2', 'soul1',
-        'sino_', 'n31', 'mhouse1', 'lock1', 'jazz2', 'jazz1', 'hopping1', 'hiphop2',
-        'hiphop1', 'capoera1', 'normal'
+        "abc", "abcd", "abcde", "abcdef", "abcdefg", "capoera1", "cdef", "defg",
+        "defgh", "dummy", "ef", "efg", "efghi", "efghijk", "fgh", "fghi",
+        "fghijk", "fghijklm", "ghi", "ghijk", "ghijklm", "hijk", "hijklm", "hiphop1",
+        "hiphop2", "hopping1", "ijklm", "ijkln", "jazz1", "jazz2", "klm", "lock1",
+        "mhouse1", "n31", "normal", "sino_", "soul1", "soul2", "thouse2", "thouse3",
+        "wave1", "wave2", "y11", "y31",
     ]
 
     mambo_puppet_filenames = [
@@ -307,6 +394,7 @@ def generate_data_paths(hash_list={}):
 
         for region in ddr_common_regions:
             pccard_filenames.append("data/mcard/%s/pages.%s" % (region, ext))
+            pccard_filenames.append("data/mcard/%s/pagel.%s" % (region, ext))
 
             for i in range(0, 10):
                 pccard_filenames.append("data/mcard/%s/page%d.%s" % (region, i, ext))
@@ -316,14 +404,14 @@ def generate_data_paths(hash_list={}):
             pccard_filenames.append("data/mcard/%s/titls_25.%s" % (region, ext))
             pccard_filenames.append("data/mcard/%s/unist_25.%s" % (region, ext))
 
-        for filename in ddr_anime_filenames:
+        for filename in ddr_movie_filenames + ddr_motion_filenames + ddr_anime_filenames:
             pccard_filenames.append("data/anime/%s/%s.%s" % (filename, filename, ext))
 
-        for motion in ddr_motion_filenames:
+        for motion in ddr_movie_filenames + ddr_motion_filenames + ddr_anime_filenames:
             pccard_filenames.append("data/motion/%s/%s.%s" % (motion, motion, ext))
 
         for movie_path in ddr_movie_paths:
-            for filename in ddr_movie_filenames:
+            for filename in ddr_movie_filenames + ddr_motion_filenames + ddr_anime_filenames:
                 pccard_filenames.append("data/movie/%s/%s.%s" % (movie_path, filename, ext))
 
         for filename in mambo_puppet_filenames:
@@ -542,6 +630,7 @@ def generate_ddr_song_paths(input_songlist=[], hash_list={}):
         "rusy",    "sabl",    "sakm",    "sans",    "scar",    "sedm",    "setu",    "shik",
         "ssca",    "ssst",    "stfa",    "stfa2",   "strb",    "strg",    "sumd",    "syak",
         "syun",    "tenk",    "tiho",    "tnaw",    "totu",    "tsub",    "wada",    "wech",
+        "beat",    "tota",
     ]
 
     songlist = ddr_base_songlist if not input_songlist else input_songlist
@@ -556,6 +645,21 @@ def generate_ddr_song_paths(input_songlist=[], hash_list={}):
             hash_list[get_filename_hash(filename)] = filename
 
             filename = "data/mdb/%s/%s.%s" % (song_id, song_id, ext)
+            hash_list[get_filename_hash(filename)] = filename
+
+            filename = "data/ja/music/%s/%s.%s" % (song_id, song_id, ext)
+            hash_list[get_filename_hash(filename)] = filename
+
+            filename = "ja/music/%s/%s.%s" % (song_id, song_id, ext)
+            hash_list[get_filename_hash(filename)] = filename
+
+            filename = "music/%s/%s.%s" % (song_id, song_id, ext)
+            hash_list[get_filename_hash(filename)] = filename
+
+            filename = "%s/%s.%s" % (song_id, song_id, ext)
+            hash_list[get_filename_hash(filename)] = filename
+
+            filename = "%s.%s" % (song_id, ext)
             hash_list[get_filename_hash(filename)] = filename
 
     return hash_list
@@ -591,16 +695,70 @@ def parse_rembind_filenames(data, hash_list={}):
                     filename = filename.replace(needle, "%s/" % region2)
                     hash_list[get_filename_hash(filename)] = filename
 
-                    print(filename)
-
     return hash_list
 
 
 # Functions used to parse GFDM data
 def parse_group_list_filenames(data, hash_list={}):
-    for i in range(len(data) // 0x20):
-        filename = data[i*0x20:(i+1)*0x20].decode('ascii').strip('\0')
+    for i in range(len(data) // 0x30):
+        filename_len = 0
 
+        while filename_len < 0x30 and data[i*0x30+filename_len] != 0:
+            filename_len += 1
+
+        filename = data[i*0x30:i*0x30+filename_len].decode('ascii').strip('\0')
+
+        for ext in common_extensions:
+            path = "%s.%s" % (filename, ext)
+            hash_list[get_filename_hash(path)] = path
+
+        filename = os.path.splitext(filename)[0]
+        for ext in common_extensions:
+            path = "%s.%s" % (filename, ext)
+            hash_list[get_filename_hash(path)] = path
+
+    return hash_list
+
+
+# Functions used to parse Dancemaniax data
+def parse_group_list_filenames_dmx(data, hash_list={}):
+    entry_size = 0x20
+    cnt = int.from_bytes(data[:4], byteorder="little")
+    for i in range(cnt):
+        filename_len = 0
+
+        while filename_len < entry_size and data[i*entry_size+filename_len] != 0:
+            filename_len += 1
+
+        filename = data[i*entry_size:i*entry_size+filename_len].decode('ascii').strip('\0')
+
+        hash_list[get_filename_hash(filename)] = filename
+
+        for ext in common_extensions:
+            path = "%s.%s" % (filename, ext)
+            hash_list[get_filename_hash(path)] = path
+
+        filename = os.path.splitext(filename)[0]
+        for ext in common_extensions:
+            path = "%s.%s" % (filename, ext)
+            hash_list[get_filename_hash(path)] = path
+
+    data = data[0x10+0x20*cnt:]
+    entry_size = 0x30
+    for i in range(len(data) // entry_size):
+        filename_len = 0
+
+        while filename_len < entry_size and data[i*entry_size+filename_len] != 0:
+            filename_len += 1
+
+        filename = data[i*entry_size:i*entry_size+filename_len].decode('ascii').strip('\0')
+        hash_list[get_filename_hash(filename)] = filename
+
+        for ext in common_extensions:
+            path = "%s.%s" % (filename, ext)
+            hash_list[get_filename_hash(path)] = path
+
+        filename = os.path.splitext(filename)[0]
         for ext in common_extensions:
             path = "%s.%s" % (filename, ext)
             hash_list[get_filename_hash(path)] = path
@@ -612,11 +770,14 @@ def parse_group_list_filenames(data, hash_list={}):
 def parse_mdb_filenames(data, entry_size, hash_list={}):
     songlist = []
 
-    for i in range(len(data) // entry_size):
-        if data[i*entry_size] == 0:
-            break
+    try:
+        for i in range(len(data) // entry_size):
+            if data[i*entry_size] == 0:
+                break
 
-        songlist.append(data[i*entry_size:i*entry_size+6].decode('ascii').strip('\0').strip())
+            songlist.append(data[i*entry_size:i*entry_size+6].decode('ascii').strip('\0').strip())
+    except:
+        pass
 
     return generate_ddr_song_paths(songlist, hash_list)
 
@@ -730,7 +891,7 @@ def main():
     parser.add_argument('--input', help='Input folder', default=None, required=True)
     parser.add_argument('--output', help='Output folder', default="output")
     parser.add_argument('--key', help='Encryption key', choices=['EXTREME', 'EURO2', 'MAX2', 'DDR5', 'MAMBO'])
-    parser.add_argument('--type', help='Game Type', choices=['ddr', 'gfdm-old', 'gfdm', 'mambo'])
+    parser.add_argument('--type', help='Game Type', choices=['ddr', 'gfdm-old', 'gfdm', 'mambo', 'dmx'])
     parser.add_argument('--no-metadata', help='Do not save metadata file', default=False, action='store_true')
     parser.add_argument('--bruteforce-ddr', help='Bruteforce DDR songs using an internal database (SLOW!)',
                         default=False, action='store_true')
@@ -755,6 +916,9 @@ def main():
     elif args.type == "gfdm":
         files = read_file_table_gfdm(os.path.join(args.input, "GAME.DAT"), 0x198000)
 
+    elif args.type == "dmx":
+        files = read_file_table_gfdm(os.path.join(args.input, "GAME.DAT"), 0xFF0000)
+
     else:
         print("Unknown format!")
         exit(1)
@@ -767,10 +931,15 @@ def main():
 
             if args.type == "ddr":
                 if hash_list[fileinfo['filename_hash']] == "data/mdb/mdb.bin":
+                    hash_list = parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x2c, hash_list)
+                    hash_list = parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x30, hash_list)
+                    hash_list = parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x64, hash_list)
+                    hash_list = parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x6c, hash_list)
                     hash_list = parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x80, hash_list)
 
                 elif hash_list[fileinfo['filename_hash']] in ["data/mdb/ja_mdb.bin", "data/mdb/ka_mdb.bin",
-                                                              "data/mdb/aa_mdb.bin", "data/mdb/ea_mdb.bin"]:
+                                                              "data/mdb/aa_mdb.bin", "data/mdb/ea_mdb.bin",
+                                                              "data/mdb/ua_mdb.bin"]:
                     hash_list = parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key), 0x38, hash_list)
 
             elif args.type == "mambo":
@@ -780,6 +949,13 @@ def main():
             elif args.type in ["gfdm", "gfdm-old"]:
                 if hash_list[fileinfo['filename_hash']] == "group_list.bin":
                     hash_list = parse_group_list_filenames(get_file_data(args.input, fileinfo, args.key), hash_list)
+
+            elif args.type == "dmx":
+                if hash_list[fileinfo['filename_hash']] == "ja_mdb.bin":
+                    hash_list = parse_mdb_filenames(get_file_data(args.input, fileinfo, args.key)[0x10:], 0x24, hash_list)
+
+                elif hash_list[fileinfo['filename_hash']] == "arrangement_data.bin":
+                    hash_list = parse_group_list_filenames_dmx(get_file_data(args.input, fileinfo, args.key), hash_list)
 
     for idx, fileinfo in enumerate(files):
         output_filename = "_output_%08x.bin" % (fileinfo['filename_hash'])
