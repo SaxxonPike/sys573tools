@@ -821,8 +821,11 @@ def read_file_table_ddr(filename, table_offset):
             unk = int.from_bytes(infile.read(2), byteorder="little")
             filesize = int.from_bytes(infile.read(4), byteorder="little")
 
-            if offset == 0xffffffff or filename_hash == 0:
+            if filename_hash == 0xffffffff and offset == 0xffff:
                 break
+
+            if filesize == 0:
+                continue
 
             files.append({
                 'idx': len(files),
@@ -850,7 +853,10 @@ def read_file_table_gfdm(filename, table_offset):
             filesize = int.from_bytes(infile.read(4), byteorder="little")
             flag = int.from_bytes(infile.read(4), byteorder="little")
 
-            if offset == 0xffffffff or filename_hash == 0:
+            if filesize == 0:
+                continue
+
+            if filename_hash == 0xffffffff and offset == 0xffffffff:
                 break
 
             files.append({
@@ -956,6 +962,8 @@ def main():
                     print(config)
 
                     for l in config.split('\n'):
+                        print("Split:", l)
+
                         if l.startswith("conversion "):
                             # Dumb way of doing this but I'm lazy
                             for path in l[len("conversion "):].split(':'):
