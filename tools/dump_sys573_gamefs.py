@@ -16,6 +16,29 @@ def get_filename_hash(filename):
 
     return filename_hash & 0xffffffff
 
+def decrypt_data_internal(data, key):
+    def calculate_crc32(input):
+        crc = -1
+
+        for c in bytearray(input, encoding='ascii'):
+            crc ^= c << 24
+
+            for _ in range(8):
+                if crc & 0x80000000:
+                    crc = (crc << 1) ^ 0x4C11DB7
+                else:
+                    crc <<= 1
+
+        return crc
+
+
+    decryption_key = calculate_crc32(key)
+
+    for i in range(len(data)):
+        data[i] ^= (decryption_key >> 8) & 0xff # This 8 can be variable it seems, but it usually is 8?
+
+    return data
+
 
 def decrypt_data(data, input_key):
     def calculate_key(input_str):
@@ -101,7 +124,7 @@ def decode_lz(input_data):
 
 
 common_extensions = [
-    'bin', 'exe', 'dat', 'rom'
+    'bin', 'exe', 'dat', 'rom', 'o'
 ]
 
 mambo_common_extensions = [
@@ -320,11 +343,11 @@ def generate_data_paths(hash_list={}):
         pccard_filenames.append("data/back/game/chr/%08d_25.cmt" % i)
 
     common_filenames = [
-        'checksum', 'psx', 'main', 'config', 'fpga_mp3', 'boot'
+        'checksum', 'psx', 'main', 'config', 'fpga_mp3', 'boot', 'aout'
     ]
 
     common_paths = [
-        '', 'boot', 's573', 'data', 'data/fpga'
+        '', 'boot', 's573', 'data', 'data/fpga', 'soft', 'soft/s573', 'boot/s573', 'boot/soft/s573'
     ]
 
     ddr_movie_filenames = [
@@ -925,6 +948,25 @@ def main():
 
     for idx, fileinfo in enumerate(files):
         if fileinfo['filename_hash'] in hash_list:
+            if hash_list[fileinfo['filename_hash']].endswith("config.dat"): # Just try to decrypt any config.dat
+                try:
+                    config = decrypt_data_internal(get_file_data(args.input, fileinfo, args.key), "/s573/config.dat").decode('ascii')
+
+                    print("Configuration file decrypted:")
+                    print(config)
+
+                    for l in config.split('\n'):
+                        if l.startswith("conversion "):
+                            # Dumb way of doing this but I'm lazy
+                            for path in l[len("conversion "):].split(':'):
+                                if path.startswith('/'):
+                                    path = path[1:]
+
+                                hash_list[get_filename_hash(path)] = path
+
+                except:
+                    pass
+
             if args.type in ["ddr", "mambo"]:
                 if hash_list[fileinfo['filename_hash']] in ["data/tex/rembind.bin", "data/all/texbind.bin"]:
                     hash_list = parse_rembind_filenames(get_file_data(args.input, fileinfo, args.key), hash_list)
