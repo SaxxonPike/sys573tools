@@ -953,28 +953,27 @@ def main():
         exit(1)
 
     for idx, fileinfo in enumerate(files):
+        if fileinfo['filename_hash'] == 0x45fda52a or fileinfo['filename_hash'] in hash_list and hash_list[fileinfo['filename_hash']].endswith("config.dat"): # Just try to decrypt any config.dat
+            try:
+                config = decrypt_data_internal(get_file_data(args.input, fileinfo, args.key), "/s573/config.dat").decode('shift-jis')
+
+                print("Configuration file decrypted:")
+                print(config)
+
+                for l in config.split('\n'):
+                    if l.startswith("conversion "):
+                        # Dumb way of doing this but I'm lazy
+                        for path in l[len("conversion "):].split(':'):
+                            if path.startswith('/'):
+                                path = path[1:]
+
+                            hash_list[get_filename_hash(path)] = path
+
+            except:
+                pass
+
+
         if fileinfo['filename_hash'] in hash_list:
-            if hash_list[fileinfo['filename_hash']].endswith("config.dat"): # Just try to decrypt any config.dat
-                try:
-                    config = decrypt_data_internal(get_file_data(args.input, fileinfo, args.key), "/s573/config.dat").decode('ascii')
-
-                    print("Configuration file decrypted:")
-                    print(config)
-
-                    for l in config.split('\n'):
-                        print("Split:", l)
-
-                        if l.startswith("conversion "):
-                            # Dumb way of doing this but I'm lazy
-                            for path in l[len("conversion "):].split(':'):
-                                if path.startswith('/'):
-                                    path = path[1:]
-
-                                hash_list[get_filename_hash(path)] = path
-
-                except:
-                    pass
-
             if args.type in ["ddr", "mambo"]:
                 if hash_list[fileinfo['filename_hash']] in ["data/tex/rembind.bin", "data/all/texbind.bin"]:
                     hash_list = parse_rembind_filenames(get_file_data(args.input, fileinfo, args.key), hash_list)
