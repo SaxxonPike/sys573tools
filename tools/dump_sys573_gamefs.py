@@ -253,7 +253,6 @@ def generate_data_paths(hash_list={}):
         "data/spu/system.vas",
         "data/tex/rembind.bin",
         "data/tex/subbind.bin",
-        "data/texture/banner/banner00.cmt",
         "data/tim/allcd/alcda0.cmt",
         "data/tim/allcd/alcdu0.cmt",
         "data/tim/allcd/alcde0.cmt",
@@ -407,6 +406,9 @@ def generate_data_paths(hash_list={}):
     ]
 
     for ext in common_extensions:
+        for i in range(0, 100):
+            pccard_filenames.append("data/texture/banner/banner%02d.%s" % (i, ext))
+
         for filename in common_filenames:
             for path in common_paths:
                 pccard_filenames.append("/".join([path, "%s.%s" % (filename, ext)]))
