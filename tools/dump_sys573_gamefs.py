@@ -16,6 +16,7 @@ def get_filename_hash(filename):
 
     return filename_hash & 0xffffffff
 
+
 def decrypt_data_internal(data, key):
     def calculate_crc32(input):
         crc = -1
@@ -1008,11 +1009,31 @@ def main():
                 elif hash_list[fileinfo['filename_hash']] == "arrangement_data.bin":
                     hash_list = parse_group_list_filenames_dmx(get_file_data(args.input, fileinfo, args.key), hash_list)
 
+    used_regions = {
+        0: {
+            'filename': "GAME.DAT",
+            'data': [0] * os.path.getsize(os.path.join(args.input, "GAME.DAT")),
+        },
+    }
+
+    pccard_path = os.path.join(args.input, "PCCARD.DAT")
+    card_path = os.path.join(args.input, "CARD.DAT")
+    card_filename = None
+
+    if os.path.exists(pccard_path):
+        card_filename = pccard_path
+
+    elif os.path.exists(card_path):
+        card_filename = card_path
+
+    if card_filename:
+        used_regions[1] = {
+            'filename': card_filename,
+            'data': [0] * os.path.getsize(os.path.join(args.input, card_filename)),
+        }
+
     for idx, fileinfo in enumerate(files):
         output_filename = "_output_%08x.bin" % (fileinfo['filename_hash'])
-
-        if fileinfo['offset'] == 0x7c0000:
-            print("%08x" % fileinfo['offset'], fileinfo)
 
         if fileinfo['filename_hash'] in hash_list:
             output_filename = hash_list[fileinfo['filename_hash']]
@@ -1026,6 +1047,14 @@ def main():
         files[idx]['filename'] = output_filename
 
         output_filename = os.path.join(args.output, output_filename)
+
+        # Mark region as used
+        region_size = fileinfo['offset'] + fileinfo['filesize']
+
+        # if (region_size % 0x800) != 0:
+        #     region_size += 0x800 - (region_size % 0x800)
+
+        used_regions[fileinfo['flag_loc']]['data'][fileinfo['offset']:region_size] = [1] * (region_size - fileinfo['offset'])
 
         if os.path.exists(output_filename):
             continue
@@ -1042,6 +1071,33 @@ def main():
 
     if not args.no_metadata:
         json.dump(files, open(os.path.join(args.output, "_metadata.json"), "w"), indent=4)
+
+
+    unreferenced_path = os.path.join(args.output, "#unreferenced")
+    for k in used_regions:
+        data = bytearray(open(os.path.join(args.input, used_regions[k]['filename']), "rb").read())
+
+        # Find and dump unreferenced regions with data in them
+        start = 0
+        while start < len(used_regions[k]['data']):
+            if used_regions[k]['data'][start] == 0:
+                end = start
+
+                while end < len(used_regions[k]['data']) and used_regions[k]['data'][end] == 0:
+                    end += 1
+
+                if len([x for x in data[start:end] if x != 0]) > 0 and len([x for x in data[start:end] if x != 0xff]) > 0:
+                    if not os.path.exists(unreferenced_path):
+                        os.makedirs(unreferenced_path)
+
+                    print("Found unreferenced data @ %08x - %08x" % (start, end))
+
+                    open(os.path.join(unreferenced_path, "%d_%08x.bin" % (k, start)), "wb").write(data[start:end])
+
+                start = end + 1
+
+            else:
+                start += 1
 
 
 if __name__ == "__main__":
