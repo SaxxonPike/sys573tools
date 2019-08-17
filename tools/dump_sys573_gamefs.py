@@ -1021,7 +1021,7 @@ def main():
     }
 
     pccard_path = os.path.join(args.input, "PCCARD.DAT")
-    pccard1_path = os.path.join(input_folder, "PCCARD1.DAT")
+    pccard1_path = os.path.join(args.input, "PCCARD1.DAT")
     card_path = os.path.join(args.input, "CARD.DAT")
     card_filename = None
 
