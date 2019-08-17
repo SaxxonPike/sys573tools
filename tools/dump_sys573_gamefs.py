@@ -882,10 +882,14 @@ def get_file_data(input_folder, fileinfo, enckey=None):
 
     game_path = os.path.join(input_folder, "GAME.DAT")
     pccard_path = os.path.join(input_folder, "PCCARD.DAT")
+    pccard1_path = os.path.join(input_folder, "PCCARD1.DAT")
     card_path = os.path.join(input_folder, "CARD.DAT")
 
     if os.path.exists(pccard_path):
         card_filename = pccard_path
+
+    if os.path.exists(pccard1_path):
+        card_filename = pccard1_path
 
     elif os.path.exists(card_path):
         card_filename = card_path
@@ -1017,11 +1021,15 @@ def main():
     }
 
     pccard_path = os.path.join(args.input, "PCCARD.DAT")
+    pccard1_path = os.path.join(input_folder, "PCCARD1.DAT")
     card_path = os.path.join(args.input, "CARD.DAT")
     card_filename = None
 
     if os.path.exists(pccard_path):
         card_filename = pccard_path
+
+    if os.path.exists(pccard1_path):
+        card_filename = pccard1_path
 
     elif os.path.exists(card_path):
         card_filename = card_path
