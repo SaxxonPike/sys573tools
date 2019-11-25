@@ -2781,6 +2781,8 @@ def generate_data_paths(hash_list={}):
             for path2 in toplevel_paths:
                 for path in common_paths:
                     pccard_filenames.append("/".join([path2, path, "%s.%s" % (filename, ext)]))
+            for path in common_paths:
+                pccard_filenames.append("/".join([path, "%s.%s" % (filename, ext)]))
 
         for part in ddr_common_parts:
             for filename in ["x"] + ["cos%02d" % x for x in range(0, 100)] + ["non%02d" % x for x in range(0, 100)]:
