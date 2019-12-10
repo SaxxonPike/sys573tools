@@ -1,0 +1,8 @@
+py573a_work/
+*.DAT
+*.MP3
+*.so
+__pycache__
+build/
+*.html
+*.c
